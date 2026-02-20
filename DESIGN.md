@@ -352,6 +352,172 @@ gems_6500   €49.99  → 8000 gems (+23% bonus)
 
 ---
 
+## 💎 ADVANCED FEATURES (Suggestions Added 2026-02-20)
+
+### 1️⃣ Season Skins Economy (Supercell Model)
+**What**: Limited-time seasonal character skins rotating monthly
+
+**Implementation**:
+- **Current Season**: "Cyberpunk Agent Zero" (neon glow, futuristic)
+- **Next Season**: "Pirate Blaze" (hat, hook, treasure vibe)
+- **Old Seasons**: Purchasable with gems (1500-2000 gems, FOMO driver)
+
+**Mechanics**:
+- New skin every 30 days
+- Free seasonal skin (tier reward in BP)
+- Premium seasonal skin (BP level 30 exclusive)
+- Archive: Old skins in shop (Limited availability marker)
+
+**Monetization Impact**: 
+- Drives engagement (new skin = login reason)
+- FOMO purchase trigger
+- 20-30% revenue uplift (Supercell data)
+
+**Priority**: Week 5+
+
+---
+
+### 2️⃣ Ranked Tiers + Prestige System
+**What**: Infinite progression ladder with prestige badges
+
+**Ranking System**:
+```
+Rookie (0-500 trophies)
+  ↓
+Silver (500-1000)
+  ↓
+Gold (1000-2000)
+  ↓
+Diamond (2000-3500)
+  ↓
+Master (3500-4500)
+  ↓
+LEGEND (4500+)
+  ↓ [PRESTIGE RESET]
+LEGEND RANK 1 (with badge)
+LEGEND RANK 2 (with stars)
+LEGEND RANK ∞ (infinite)
+```
+
+**Prestige Badge**:
+- Purple glow on character during 1v1
+- Star count (⭐ per prestige level)
+- Visible in player profile
+- Bragging rights = engagement driver
+
+**Psychology**: 
+- Infinite progression = long-term retention
+- Prestige visible in 1v1 = intimidation factor
+- Players show off badge
+
+**Priority**: Week 4-5
+
+---
+
+### 3️⃣ "Near Miss" Mechanic (Revenge Queue)
+**What**: Instant rematch system for competitive energy
+
+**Trigger**: Opponent beats you by < 50 points
+```
+GAME OVER
+┌─────────────────────────┐
+│ You Lost! (2450 vs 2500)│
+│                         │
+│ [REVENGE MATCH]  [Menu] │
+│ "Beat Jake again?"      │
+└─────────────────────────┘
+
+Click REVENGE:
+  → Instant queue (same opponent)
+  → Best-of-3 challenge option
+  → Loser streak tracking
+```
+
+**Advanced**: Best-of-3 Mode
+- Win 2/3 games vs same opponent
+- Prize pool for winner (gems/trophies)
+- Bragging rights (leaderboard)
+
+**Psychology**:
+- Angry players = most engaged players
+- Drives 2-3x rematch rate
+- Session duration increase
+
+**Priority**: Week 6+
+
+---
+
+### 4️⃣ Power-Up Trading (Advanced - Later)
+**What**: Mid-match power-up sacrifice mechanic (high-skill)
+
+**Mechanic** (Tournament/Clan Mode only):
+- Sacrifice your Shield → give opponent Reverse for 2s
+- Trade Speed Boost for ally power-up (clan mode)
+- Risk/reward: "Do I use Shield or force their mistake?"
+
+**Example Flow**:
+```
+You have: Shield (5s) + Magnet (3s)
+You activate: Shield
+
+Turn 3: New power-up spawns
+Opponent gets: Freeze
+You trade: Sacrifice Shield → Opponent gets Reverse (2s)
+
+Result: You're vulnerable, but opponent loses control for 2s
+```
+
+**Advanced**:
+- Trading cooldown: Can trade 2× per match
+- Clan bonus: Can trade to clan-mate (co-op mode)
+- Tournament format: Trading enabled/disabled per event
+
+**Psychology**:
+- Skill expression: Good players outplay via trading
+- Depth: RPS-style (Rock-Paper-Scissors power-up meta)
+- Esports potential: Commentator hype moment
+
+**Priority**: Week 8+ (after core stable)
+
+---
+
+## 🎯 Implementation Roadmap (Updated)
+
+### Week 1-2 (CORE)
+- [x] Isometric camera
+- [x] Player movement
+- [x] Tunnel parallax
+- [x] Obstacles + collision
+- [x] Top bar 1v1 UI
+- [ ] APK build #1
+
+### Week 3 (OPPONENT VIZ)
+- [ ] Opponent in tunnel
+- [ ] Collision detection
+- [ ] Victory animations
+- [ ] Sound effects
+
+### Week 4-5 (MONETIZATION + PRESTIGE)
+- [ ] Season skins system
+- [ ] Prestige ladder
+- [ ] Badge visuals
+- [ ] IAP integration
+- [ ] Battle Pass
+
+### Week 6+ (ENGAGEMENT)
+- [ ] Revenge queue
+- [ ] Best-of-3 tournaments
+- [ ] Clan system
+- [ ] Leaderboards
+
+### Week 8+ (ADVANCED)
+- [ ] Power-up trading
+- [ ] Tournament modes
+- [ ] Esports integration
+
+---
+
 **Created**: 2026-02-20  
 **Owner**: Bart (game designer) + Claude (implementation)  
 **Status**: In Progress  
+**Last Updated**: 2026-02-20 (Advanced Features Added)  
