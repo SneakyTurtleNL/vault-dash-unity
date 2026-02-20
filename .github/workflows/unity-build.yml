@@ -8,50 +8,66 @@ on:
   workflow_dispatch:
 
 env:
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
   UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
 jobs:
   build:
     name: Build for Android
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
+      # ── Checkout ─────────────────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
         with:
           lfs: true
 
+      # ── Cache Unity Library ──────────────────────────────────────────────────
       - name: Cache Library
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: Library
-          key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key:          Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
             Library-Android-
             Library-
 
-      - name: Build
+      # ── Build ────────────────────────────────────────────────────────────────
+      - name: Build Android APK
         uses: game-ci/unity-builder@v4
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASS:   ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          ANDROID_KEYALIAS_NAME:   ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          ANDROID_KEYALIAS_PASS:   ${{ secrets.ANDROID_KEYALIAS_PASS }}
+          BUILD_OUTPUT_PATH:       build/Android
+          APP_VERSION:             "0.1.0"
+          BUILD_NUMBER:            ${{ github.run_number }}
         with:
-          unityVersion: 2022.3.20f1
-          targetPlatform: Android
-          androidAppBundle: false
-          androidKeystoreName: vault-dash.keystore
-          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
-          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
-          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+          unityVersion:         2022.3.20f1
+          targetPlatform:       Android
+          buildMethod:          BuildScript.BuildAndroid
+          androidAppBundle:     false
+          buildsPath:           build
 
+      # ── Upload APK Artifact ──────────────────────────────────────────────────
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: vault-dash-android
-          path: build/Android/*.apk
+          name:              vault-dash-android-${{ github.run_number }}
+          path:              build/Android/*.apk
           if-no-files-found: warn
+          retention-days:    14
 
-      - name: Notify on success
-        if: success()
-        run: echo "Build succeeded! APK is ready."
+      # ── Summary ──────────────────────────────────────────────────────────────
+      - name: Build summary
+        if: always()
+        run: |
+          echo "## Vault Dash Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}"    >> $GITHUB_STEP_SUMMARY
+          echo "- **Run**: #${{ github.run_number }}"   >> $GITHUB_STEP_SUMMARY
+          echo "- **SHA**: ${{ github.sha }}"           >> $GITHUB_STEP_SUMMARY
+          echo "- **APK**: build/Android/VaultDash.apk" >> $GITHUB_STEP_SUMMARY
