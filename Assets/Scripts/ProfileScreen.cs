@@ -76,6 +76,15 @@ public class ProfileScreen : MonoBehaviour
     public Button    signOutButton;
     public Button    privacyPolicyButton;
 
+    [Header("Season Info (Stats Panel)")]
+    [Tooltip("e.g. 'Season 1 — Neon Vault'")]
+    public TMP_Text  currentSeasonText;     // "Season 1 — Neon Vault"
+    public TMP_Text  peakTrophiesText;      // "Peak this season: 2,340 🏆"
+    public TMP_Text  seasonRewardText;      // "Season reward: 23 💎"
+    public TMP_Text  seasonEndText;         // "Ends in 3d 4h"
+    public Image     seasonAccentBar;       // colored by season theme
+    public GameObject seasonInfoSection;   // show/hide the whole block
+
     [Header("Back")]
     public Button backButton;
 
@@ -114,9 +123,24 @@ public class ProfileScreen : MonoBehaviour
     // ─── Activation ───────────────────────────────────────────────────────────
     public void OnActivate()
     {
+        // Subscribe to season events for live season info updates
+        if (SeasonManager.Instance != null)
+        {
+            SeasonManager.Instance.OnSeasonChanged -= OnSeasonChanged;
+            SeasonManager.Instance.OnSeasonChanged += OnSeasonChanged;
+        }
+
         RefreshPlayerIdentity();
         SwitchTab(_activeTab);
     }
+
+    void OnDisable()
+    {
+        if (SeasonManager.Instance != null)
+            SeasonManager.Instance.OnSeasonChanged -= OnSeasonChanged;
+    }
+
+    void OnSeasonChanged(SeasonInfo _) => RefreshSeasonInfo();
 
     // ─── Player Identity ──────────────────────────────────────────────────────
     void RefreshPlayerIdentity()
@@ -240,6 +264,46 @@ public class ProfileScreen : MonoBehaviour
             currentRankText.text  = rankDisplay;
             currentRankText.color = tier.color;
         }
+
+        // Season info block
+        RefreshSeasonInfo();
+    }
+
+    // ─── Season Info ──────────────────────────────────────────────────────────
+
+    void RefreshSeasonInfo()
+    {
+        if (seasonInfoSection != null)
+            seasonInfoSection.SetActive(SeasonManager.Instance != null && SeasonManager.Instance.IsInitialized);
+
+        var season = SeasonManager.Instance?.CurrentSeason;
+        if (season == null) return;
+
+        // Season label
+        if (currentSeasonText != null)
+            currentSeasonText.text = $"Season {season.seasonNumber} — {season.name}";
+
+        // Peak trophies this season (from SeasonManager live cache)
+        int peakTrophies = SeasonManager.Instance?.PeakTrophiesThisSeason ?? 0;
+        if (peakTrophiesText != null)
+            peakTrophiesText.text = $"Peak this season: {peakTrophies:N0} 🏆";
+
+        // Estimated season reward
+        int estimatedGems = PlayerSeasonRecord.CalculateGemReward(peakTrophies);
+        if (seasonRewardText != null)
+            seasonRewardText.text = $"Est. season reward: {estimatedGems} 💎";
+
+        // Time remaining
+        if (seasonEndText != null)
+            seasonEndText.text = season.TimeRemaining.TotalSeconds > 0
+                ? $"Ends in {season.TimeRemainingFormatted}"
+                : "Season ended";
+
+        // Theme accent
+        if (seasonAccentBar != null && season.cosmetic != null)
+            seasonAccentBar.color = season.cosmetic.ThemeColorUnity;
+        else if (seasonAccentBar != null && season.arenaOverlay != null)
+            seasonAccentBar.color = season.arenaOverlay.PrimaryColor;
     }
 
     // ─── Mastery ──────────────────────────────────────────────────────────────

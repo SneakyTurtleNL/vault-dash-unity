@@ -56,6 +56,15 @@ public class RankedLadderScreen : MonoBehaviour
     public Button       toggleRankInfoButton;
     public TMP_Text     rankInfoText;
 
+    [Header("Season Selector")]
+    [Tooltip("Dropdown listing 'Current Season', 'Season 2', 'Season 1'…")]
+    public TMP_Dropdown seasonDropdown;
+    public TMP_Text     seasonDropdownLabel;   // e.g. "Season 1 — Neon Vault"
+    public GameObject   pastSeasonBanner;      // shown when viewing a past season
+    public TMP_Text     pastSeasonBannerText;  // "📜 Viewing archived Season 1"
+    public Button       returnToCurrentButton; // "Back to Current Season"
+    public TMP_Text     currentSeasonLabel;    // "Season 1 — Neon Vault | Ends in 3d"
+
     [Header("Navigation")]
     public Button       playRankedButton;
     public Button       backButton;
@@ -89,6 +98,11 @@ public class RankedLadderScreen : MonoBehaviour
     private bool _rankInfoVisible = false;
     private List<LeaderboardEntry> _entries = new List<LeaderboardEntry>();
 
+    // Season selector
+    private string _viewingSeasonId = null;     // null = current season
+    private List<string> _seasonIds = new List<string>();
+    private bool _viewingPastSeason = false;
+
     [System.Serializable]
     public struct LeaderboardEntry
     {
@@ -109,33 +123,66 @@ public class RankedLadderScreen : MonoBehaviour
     // ─── Init ─────────────────────────────────────────────────────────────────
     void Start()
     {
-        if (backButton          != null) backButton.onClick.AddListener(OnBack);
-        if (playRankedButton    != null) playRankedButton.onClick.AddListener(OnPlayRanked);
-        if (refreshButton       != null) refreshButton.onClick.AddListener(() => StartCoroutine(LoadLeaderboard()));
-        if (toggleRankInfoButton!= null) toggleRankInfoButton.onClick.AddListener(ToggleRankInfo);
+        if (backButton              != null) backButton.onClick.AddListener(OnBack);
+        if (playRankedButton        != null) playRankedButton.onClick.AddListener(OnPlayRanked);
+        if (refreshButton           != null) refreshButton.onClick.AddListener(() => StartCoroutine(LoadLeaderboard()));
+        if (toggleRankInfoButton    != null) toggleRankInfoButton.onClick.AddListener(ToggleRankInfo);
+        if (returnToCurrentButton   != null) returnToCurrentButton.onClick.AddListener(ReturnToCurrentSeason);
+        if (seasonDropdown          != null) seasonDropdown.onValueChanged.AddListener(OnSeasonDropdownChanged);
 
         if (rankInfoPanel       != null) rankInfoPanel.SetActive(false);
         if (rankInfoText        != null) rankInfoText.text = GetRankInfoText();
+        if (pastSeasonBanner    != null) pastSeasonBanner.SetActive(false);
     }
 
     // ─── Activation ───────────────────────────────────────────────────────────
     public void OnActivate()
     {
-        // Subscribe to live prestige updates
+        // Subscribe to live prestige + season updates
         if (RankedProgressionManager.Instance != null)
         {
             RankedProgressionManager.Instance.OnProgressionChanged -= OnProgressionChanged;
             RankedProgressionManager.Instance.OnProgressionChanged += OnProgressionChanged;
         }
+        if (SeasonManager.Instance != null)
+        {
+            SeasonManager.Instance.OnSeasonChanged -= OnSeasonChanged;
+            SeasonManager.Instance.OnSeasonChanged += OnSeasonChanged;
+        }
+
+        // Reset to current season
+        _viewingSeasonId    = null;
+        _viewingPastSeason  = false;
 
         RefreshRankCard();
+        RefreshCurrentSeasonLabel();
+        StartCoroutine(PopulateSeasonDropdown());
         StartCoroutine(LoadLeaderboard());
+    }
+
+    void OnSeasonChanged(SeasonInfo newSeason)
+    {
+        RefreshCurrentSeasonLabel();
+        StartCoroutine(PopulateSeasonDropdown());
+    }
+
+    void RefreshCurrentSeasonLabel()
+    {
+        var season = SeasonManager.Instance?.CurrentSeason;
+        if (currentSeasonLabel != null && season != null)
+        {
+            currentSeasonLabel.text = season.TimeRemaining.TotalSeconds > 0
+                ? $"Season {season.seasonNumber} — {season.name}  |  Ends in {season.TimeRemainingFormatted}"
+                : $"Season {season.seasonNumber} — {season.name}  (ended)";
+        }
     }
 
     void OnDisable()
     {
         if (RankedProgressionManager.Instance != null)
             RankedProgressionManager.Instance.OnProgressionChanged -= OnProgressionChanged;
+        if (SeasonManager.Instance != null)
+            SeasonManager.Instance.OnSeasonChanged -= OnSeasonChanged;
     }
 
     void OnProgressionChanged(RankedProgressionManager.ProgressionState _)
@@ -241,11 +288,20 @@ public class RankedLadderScreen : MonoBehaviour
 
         _entries.Clear();
 
+        if (_viewingPastSeason && !string.IsNullOrEmpty(_viewingSeasonId) &&
+            SeasonManager.Instance != null)
+        {
+            // Load archived season leaderboard
+            yield return StartCoroutine(LoadPastSeasonLeaderboard(_viewingSeasonId));
+        }
+        else
+        {
 #if NAKAMA_AVAILABLE
-        yield return StartCoroutine(FetchNakamaLeaderboard());
+            yield return StartCoroutine(FetchNakamaLeaderboard());
 #else
-        yield return StartCoroutine(GenerateSimulatedLeaderboard());
+            yield return StartCoroutine(GenerateSimulatedLeaderboard());
 #endif
+        }
 
         BuildLeaderboardRows();
 
@@ -410,6 +466,128 @@ public class RankedLadderScreen : MonoBehaviour
                 float t = 1f - ((float)localIdx / (_entries.Count - 1));
                 leaderboardScrollRect.verticalNormalizedPosition = t;
             }
+        }
+    }
+
+    // ─── Season Dropdown ──────────────────────────────────────────────────────
+
+    IEnumerator PopulateSeasonDropdown()
+    {
+        if (seasonDropdown == null) yield break;
+
+        _seasonIds.Clear();
+        var options = new System.Collections.Generic.List<TMP_Dropdown.OptionData>();
+
+        // Option 0: Current season
+        var currentSeason = SeasonManager.Instance?.CurrentSeason;
+        string currentLabel = currentSeason != null
+            ? $"Season {currentSeason.seasonNumber} — {currentSeason.name} (Current)"
+            : "Current Season";
+        options.Add(new TMP_Dropdown.OptionData(currentLabel));
+        _seasonIds.Add(null);   // null = current
+
+        // Load past seasons from Firestore/stub
+        var pastSeasons = new System.Collections.Generic.List<(string id, int num, string name)>();
+        yield return StartCoroutine(FetchPastSeasons(list => pastSeasons = list));
+
+        foreach (var s in pastSeasons)
+        {
+            options.Add(new TMP_Dropdown.OptionData($"Season {s.num} — {s.name}"));
+            _seasonIds.Add(s.id);
+        }
+
+        seasonDropdown.ClearOptions();
+        seasonDropdown.AddOptions(options);
+        seasonDropdown.SetValueWithoutNotify(0);
+    }
+
+    IEnumerator FetchPastSeasons(
+        System.Action<System.Collections.Generic.List<(string, int, string)>> callback)
+    {
+        var result = new System.Collections.Generic.List<(string, int, string)>();
+
+#if FIREBASE_FIRESTORE
+        // Call getSeasonList HTTPS callable
+        // var func = FirebaseFunctions.DefaultInstance.GetHttpsCallable("getSeasonList");
+        // ... parse response
+        yield return null;
+        result.Add(("season_0", 0, "Founder's Vault"));
+#else
+        yield return null;
+        // Stub: add fictional past seasons for testing
+        if (SeasonManager.Instance?.CurrentSeason?.seasonNumber > 1)
+        {
+            for (int i = (SeasonManager.Instance?.CurrentSeason?.seasonNumber ?? 1) - 1; i >= 0; i--)
+                result.Add(($"season_{i}", i, $"Past Season {i}"));
+        }
+#endif
+        callback(result);
+    }
+
+    void OnSeasonDropdownChanged(int index)
+    {
+        if (index < 0 || index >= _seasonIds.Count) return;
+        string selectedId = _seasonIds[index];
+        _viewingSeasonId   = selectedId;
+        _viewingPastSeason = selectedId != null;
+
+        // Update past season banner visibility
+        if (pastSeasonBanner != null)
+            pastSeasonBanner.SetActive(_viewingPastSeason);
+
+        if (pastSeasonBannerText != null && _viewingPastSeason)
+        {
+            var option = seasonDropdown.options[index];
+            pastSeasonBannerText.text = $"📜 Archived — {option.text}";
+        }
+
+        // Ranked play button only for current season
+        if (playRankedButton != null)
+            playRankedButton.interactable = !_viewingPastSeason;
+
+        StartCoroutine(LoadLeaderboard());
+    }
+
+    void ReturnToCurrentSeason()
+    {
+        _viewingSeasonId   = null;
+        _viewingPastSeason = false;
+        if (seasonDropdown != null) seasonDropdown.SetValueWithoutNotify(0);
+        if (pastSeasonBanner != null) pastSeasonBanner.SetActive(false);
+        if (playRankedButton != null) playRankedButton.interactable = true;
+        StartCoroutine(LoadLeaderboard());
+    }
+
+    // ─── Leaderboard — past season support ───────────────────────────────────
+
+    IEnumerator LoadPastSeasonLeaderboard(string seasonId)
+    {
+        _entries.Clear();
+        string uid = PlayerPrefs.GetString("VaultDash_UID", "");
+
+        var seasonEntries = new System.Collections.Generic.List<SeasonLeaderboardEntry>();
+        yield return StartCoroutine(
+            SeasonManager.Instance.LoadSeasonLeaderboard(seasonId, 100,
+                list => seasonEntries = list));
+
+        foreach (var e in seasonEntries)
+        {
+            var rankTier = GetRankTier(e.trophies);
+            _entries.Add(new LeaderboardEntry
+            {
+                rank          = e.rank,
+                playerName    = e.username,
+                trophies      = e.trophies,
+                rankName      = rankTier.name,
+                prestigeLevel = e.prestigeLevel,
+                isLocalPlayer = e.isLocalPlayer || e.uid == uid,
+            });
+        }
+
+        if (_entries.Count == 0)
+        {
+            // Fallback to stub if archive is empty
+            yield return GenerateSimulatedLeaderboard();
         }
     }
 

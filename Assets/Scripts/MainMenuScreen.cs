@@ -50,6 +50,15 @@ public class MainMenuScreen : MonoBehaviour
     [Header("Version")]
     public TMP_Text  versionText;
 
+    [Header("Season Countdown")]
+    [Tooltip("Attach a SeasonCountdownWidget component; it refreshes itself")]
+    public SeasonCountdownWidget seasonCountdownWidget;
+    [Tooltip("Fallback text if SeasonCountdownWidget not used")]
+    public TMP_Text              seasonCountdownText;   // "Season 1 ends in 3d 4h"
+    public TMP_Text              seasonNameBadgeText;   // "🔥 NEON VAULT"
+    public Image                 seasonThemeAccent;     // colored line (theme color)
+    public Button                seasonBannerButton;    // tap → ranked screen
+
     [Header("Animated Elements")]
     public RectTransform titleContainer;  // bounces on entry
     public CanvasGroup   buttonGroup;     // fades in staggered
@@ -78,6 +87,20 @@ public class MainMenuScreen : MonoBehaviour
     {
         RefreshCurrency();
         RefreshNetworkStatus();
+        RefreshSeasonBanner();
+
+        // Subscribe to live season changes
+        if (SeasonManager.Instance != null)
+        {
+            SeasonManager.Instance.OnSeasonChanged   -= OnSeasonChanged;
+            SeasonManager.Instance.OnSeasonChanged   += OnSeasonChanged;
+            SeasonManager.Instance.OnSeasonEndingSoon-= OnSeasonEndingSoon;
+            SeasonManager.Instance.OnSeasonEndingSoon+= OnSeasonEndingSoon;
+        }
+
+        // Wire season banner button
+        if (seasonBannerButton != null)
+            seasonBannerButton.onClick.AddListener(OnSeasonBannerTapped);
         StartShowcase();
         PlayEntryAnimation();
     }
@@ -86,7 +109,66 @@ public class MainMenuScreen : MonoBehaviour
     {
         if (_showcaseRoutine != null) StopCoroutine(_showcaseRoutine);
         if (_entryRoutine    != null) StopCoroutine(_entryRoutine);
+
+        if (SeasonManager.Instance != null)
+        {
+            SeasonManager.Instance.OnSeasonChanged    -= OnSeasonChanged;
+            SeasonManager.Instance.OnSeasonEndingSoon -= OnSeasonEndingSoon;
+        }
+
+        if (seasonBannerButton != null)
+            seasonBannerButton.onClick.RemoveListener(OnSeasonBannerTapped);
     }
+
+    // ─── Season Banner ────────────────────────────────────────────────────────
+
+    void OnSeasonChanged(SeasonInfo newSeason)
+    {
+        RefreshSeasonBanner();
+    }
+
+    void OnSeasonEndingSoon(SeasonInfo season, System.TimeSpan remaining)
+    {
+        // Optionally show a notification or pulse animation
+        if (seasonCountdownText != null)
+            seasonCountdownText.color = new Color(1f, 0.4f, 0.3f); // urgent red
+    }
+
+    void RefreshSeasonBanner()
+    {
+        // SeasonCountdownWidget handles its own refresh — just make sure it's active
+        if (seasonCountdownWidget != null)
+        {
+            seasonCountdownWidget.gameObject.SetActive(true);
+            seasonCountdownWidget.Refresh();
+            return;
+        }
+
+        // Fallback: manual text update
+        var season = SeasonManager.Instance?.CurrentSeason;
+        if (season == null)
+        {
+            if (seasonCountdownText != null) seasonCountdownText.text = "";
+            return;
+        }
+
+        if (seasonCountdownText != null)
+        {
+            var remaining = season.TimeRemaining;
+            if (remaining.TotalSeconds > 0)
+                seasonCountdownText.text = $"Season {season.seasonNumber} ends in {season.TimeRemainingFormatted}";
+            else
+                seasonCountdownText.text = "Season ended";
+        }
+
+        if (seasonNameBadgeText != null)
+            seasonNameBadgeText.text = $"🏆 {season.name.ToUpper()}";
+
+        if (seasonThemeAccent != null && season.cosmetic != null)
+            seasonThemeAccent.color = season.cosmetic.ThemeColorUnity;
+    }
+
+    void OnSeasonBannerTapped() => UIManager.Instance?.ShowRankedLadder();
 
     // ─── Currency ─────────────────────────────────────────────────────────────
     void RefreshCurrency()
