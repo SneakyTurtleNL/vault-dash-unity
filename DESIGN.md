@@ -670,7 +670,95 @@ Result: You're vulnerable, but opponent loses control for 2s
 
 ---
 
+---
+
+## 🚀 WEEK 5+ ROADMAP (Post-Saturday Launch)
+
+### Phase 3: Asset Generation + 3D Exploration
+
+**Week 5 (Days 1-3): Asset Sprint**
+- [ ] Generate 6 back-view character sprites (Scenario.gg)
+  - Batch 1: Cipher, Ghost, Nova (3 renders)
+  - Batch 2: Pulse, Eclipse, Phoenix (3 renders)
+- [ ] Generate 3 UI assets (Scenario.gg)
+  - App icon (512×512)
+  - Feature graphic (1024×500)
+  - Loading screen
+- [ ] Generate 15 arena background PNGs (parallax layers, if needed)
+- [ ] Wire all assets into game
+
+**Week 5 (Days 4-5): 3D Character Exploration** 🆕
+- [ ] Test Scenario.gg GLB export (BREAKTHROUGH: supports .glb!)
+  - Generate 1 character as 3D
+  - Download as `.glb` file
+  - Import into Unity via GLTFUtility or UnityGLTF
+  - Verify skeleton/armature compatibility
+- [ ] If successful: 3D character rigging path
+- [ ] If not: revert to 2D + Spine (proven backup)
+
+**Quality Comparison**:
+- 2D PNG + Spine: 8/10 (current, shipping Saturday)
+- 3D GLB + animation: 9.5/10 (AAA-grade, Week 5 exploration)
+
+**Cost**: Same Scenario.gg credits (GLB = native export, no extra render needed)
+
+---
+
+### Phase 4: Season 1 Features (Week 5-6)
+
+**Monetization**:
+- [ ] Season skins (monthly rotation)
+  - Cyberpunk Agent Zero, Pirate Blaze, Samurai Knox, Priestess Jade, Hacker Cipher, etc.
+  - 15-20 total skins (3-5 per character)
+  - Batch over 2-3 weeks for credit efficiency
+
+**Engagement**:
+- [ ] Prestige system (Legend Rank ∞ + badges)
+- [ ] Revenge Queue tournaments (Best-of-3)
+- [ ] Clan system (Firestore chat, clan leaderboard)
+- [ ] Daily themed runs (Speedrun Day, Mega-Loot Day)
+
+**Play Console**:
+- [ ] Alpha testing on Google Play (5-10 tester group)
+- [ ] Beta recruitment (50-100 players)
+- [ ] Community feedback integration
+
+---
+
+### Phase 5: Polish + Optimization (Week 7+)
+
+- [ ] Performance optimization (GPU batching, asset streaming)
+- [ ] Graphics settings (quality levels for low-end devices)
+- [ ] Network optimization (Nakama latency reduction)
+- [ ] Accessibility (colorblind mode, text scaling)
+- [ ] Localization (Spanish, French, German, Dutch)
+
+---
+
+## 🎮 GLB 3D CHARACTER PATH (NEW - Feb 21)
+
+**Discovery**: Scenario.gg exports full 3D models as `.glb` files!
+
+**What This Enables**:
+- ✅ Full 3D mesh with skeleton/armature
+- ✅ Native Unity support (GLTFUtility, UnityGLTF)
+- ✅ Professional 3D characters without hiring artist
+- ✅ 360° character rotation in-game possible
+- ✅ Same cost as 2D (native export format)
+
+**Implementation Path (Week 5)**:
+1. Generate 1 character in Scenario.gg (3D model)
+2. Download `.glb` file
+3. Import into Unity → full mesh ready
+4. Test rig with Spine 2D or direct 3D animation
+5. If successful: generate all 10 characters as 3D
+6. If not: stay with proven 2D + Spine backup
+
+**Decision**: Continue 2D for Saturday (non-blocking). GLB exploration is **high priority Week 5** feature.
+
+---
+
 **Created**: 2026-02-20  
 **Owner**: Bart (game designer) + Claude (implementation)  
-**Status**: In Progress  
-**Last Updated**: 2026-02-21 (Asset Audit + TODO Added)  
+**Status**: In Progress (Week 5 Planning Complete)  
+**Last Updated**: 2026-02-21 05:04 UTC (GLB Discovery + Week 5-7 Roadmap Added)  
