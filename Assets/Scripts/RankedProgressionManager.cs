@@ -176,6 +176,9 @@ public class RankedProgressionManager : MonoBehaviour
             OnTierChanged?.Invoke(oldTier, State.currentTier);
         }
 
+        // Update season peak trophies (SeasonManager tracks the personal best)
+        SeasonManager.Instance?.UpdatePeakTrophies(State.trophies);
+
         CheckPrestigeAvailability();
         OnProgressionChanged?.Invoke(State);
     }
