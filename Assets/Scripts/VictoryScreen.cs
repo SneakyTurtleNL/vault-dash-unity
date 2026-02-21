@@ -86,6 +86,10 @@ public class VictoryScreen : MonoBehaviour
         // Button listeners
         if (rematchButton != null) rematchButton.onClick.AddListener(OnRematch);
         if (menuButton    != null) menuButton.onClick.AddListener(OnMenu);
+
+        // ── Phase 2: Subscribe to IAP gem grants to update UI ──
+        IAPManager.OnGemsGranted   += OnGemsGrantedCallback;
+        IAPManager.OnPurchaseError += OnPurchaseErrorCallback;
     }
 
     // ─── Public API ───────────────────────────────────────────────────────────
@@ -352,5 +356,28 @@ public class VictoryScreen : MonoBehaviour
         Hide();
         GameManager.Instance?.ReturnToMenu();
         AudioManager.Instance?.PlayMenuMusic();
+
+        // ── Phase 2: Reset post-processing when returning to menu ──
+        PostProcessingManager.Instance?.ResetEffects();
+    }
+
+    void OnDestroy()
+    {
+        // ── Phase 2: Unsubscribe IAP events ──
+        IAPManager.OnGemsGranted   -= OnGemsGrantedCallback;
+        IAPManager.OnPurchaseError -= OnPurchaseErrorCallback;
+    }
+
+    // ─── Phase 2: IAP Callbacks ───────────────────────────────────────────────
+    void OnGemsGrantedCallback(string productId, int amount)
+    {
+        Debug.Log($"[VictoryScreen] Gems granted: {amount} from {productId}");
+        // Optional: Show a toast notification on-screen
+    }
+
+    void OnPurchaseErrorCallback(string reason)
+    {
+        Debug.LogWarning($"[VictoryScreen] Purchase error: {reason}");
+        // Optional: Show an error panel
     }
 }

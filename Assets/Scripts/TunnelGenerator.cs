@@ -78,6 +78,19 @@ public class TunnelGenerator : MonoBehaviour
             return;
         }
 
+        // ── Phase 2: If CinemachineSetup is present, let it handle the camera ──
+        // TunnelGenerator still sets orthographic mode + size as fallback baseline;
+        // Cinemachine's lens override will take priority if a Virtual Camera is active.
+        CinemachineSetup cinemachineSetup = FindObjectOfType<CinemachineSetup>();
+        if (cinemachineSetup != null)
+        {
+            // Let Cinemachine own position + rotation; only set ortho mode here.
+            mainCamera.orthographic     = true;
+            mainCamera.orthographicSize = orthoSize;
+            Debug.Log("[TunnelGenerator] CinemachineSetup detected — camera position deferred to Cinemachine.");
+            return;
+        }
+
         mainCamera.transform.position    = cameraPosition;
         mainCamera.transform.eulerAngles = cameraEuler;
         mainCamera.orthographic          = true;

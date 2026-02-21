@@ -310,6 +310,10 @@ public class Player : MonoBehaviour
             AudioManager.Instance?.PlayObstacleHit();
             ParticleEffects.Instance?.ObstacleBurst(transform.position);
 
+            // ── Phase 2: Vignette flash + Firebase event ──
+            PostProcessingManager.Instance?.VignetteFlash();
+            FirebaseManager.Instance?.LogOpponentCollision(GameManager.Instance?.Distance ?? 0f);
+
             GameManager.Instance?.GameOver();
         }
         else if (other.CompareTag("Coin"))
@@ -331,6 +335,10 @@ public class Player : MonoBehaviour
             ParticleEffects.Instance?.CoinBurst(other.transform.position);
             ParticleEffects.Instance?.ScorePopup(other.transform.position, pts, combo);
 
+            // ── Phase 2: Bloom pulse + Firebase ──
+            PostProcessingManager.Instance?.BloomPulse(2.5f);
+            FirebaseManager.Instance?.LogLootCollected("coin");
+
             Destroy(other.gameObject);
         }
         else if (other.CompareTag("Gem"))
@@ -342,6 +350,10 @@ public class Player : MonoBehaviour
             AudioManager.Instance?.PlayGemCollect();
             ParticleEffects.Instance?.GemBurst(other.transform.position);
             ParticleEffects.Instance?.ScorePopup(other.transform.position, pts, false);
+
+            // ── Phase 2: Big bloom pulse + Firebase ──
+            PostProcessingManager.Instance?.BloomPulse(5f);
+            FirebaseManager.Instance?.LogLootCollected("gem");
 
             Destroy(other.gameObject);
         }

@@ -149,6 +149,10 @@ public class GameManager : MonoBehaviour
         // ── Week 2: reset opponent visualizer ──
         OpponentVisualizer.Instance?.ResetVisualizer();
 
+        // ── Phase 2: reset FPS stats + post-processing ──
+        FrameRateDisplay.Instance?.ResetStats();
+        PostProcessingManager.Instance?.ResetEffects();
+
         // Apply arena settings
         ArenaSettings settings = GetArenaSettings(selectedArena);
         if (tunnelGenerator != null)
@@ -159,11 +163,29 @@ public class GameManager : MonoBehaviour
         // Spawn player
         SpawnPlayer();
 
+        // ── Phase 2: Rebind Cinemachine virtual camera to new player instance ──
+        CinemachineSetup cinemachineSetup = FindObjectOfType<CinemachineSetup>();
+        if (cinemachineSetup != null && playerInstance != null)
+            cinemachineSetup.BindToPlayer(playerInstance.transform);
+
         // Start distance counter
         if (distanceRoutine != null) StopCoroutine(distanceRoutine);
         distanceRoutine = StartCoroutine(TrackDistance(settings.scrollSpeed));
 
         SetState(GameState.Playing);
+
+        // ── Phase 2: Firebase game_start event ──
+        string arenaName = selectedArena.ToString();
+        string charName  = "Agent Zero";  // TODO: pull from CharacterDatabase.GetProfile(selectedChar).displayName
+        int    charIdx   = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        if (CharacterDatabase.Instance != null)
+        {
+            var prof = CharacterDatabase.Instance.GetProfile(charIdx);
+            if (prof != null) charName = prof.displayName;
+        }
+        FirebaseManager.Instance?.LogGameStart(arenaName, charName);
+        FirebaseManager.Instance?.SetPlayerLevel(PlayerPrefs.GetInt("VaultDash_PlayerLevel", 1));
+        FirebaseManager.Instance?.SetSelectedCharacter(charName);
     }
 
     void SpawnPlayer()
@@ -231,6 +253,16 @@ public class GameManager : MonoBehaviour
             gameOverHighScoreText.text = $"Best: {HighScore}";
 
         Debug.Log($"[GameManager] Game Over — Score: {Score}, Best: {HighScore}");
+
+        // ── Phase 2: Firebase game_over event (winner determined by MatchManager) ──
+        bool isWinner = MatchManager.Instance != null && MatchManager.Instance.Status == MatchManager.MatchStatus.Finished
+            ? GameManager.Instance?.Distance >= MatchManager.Instance.OpponentDistance
+            : false;
+        FirebaseManager.Instance?.LogGameOver(Score, Distance, isWinner);
+
+        // ── Phase 2: Color grading based on result ──
+        if (isWinner) PostProcessingManager.Instance?.SetVictoryColors();
+        else          PostProcessingManager.Instance?.SetDefeatColors();
     }
 
     public void PauseGame()  => SetState(GameState.Paused);
