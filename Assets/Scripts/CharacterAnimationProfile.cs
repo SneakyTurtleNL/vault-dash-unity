@@ -46,6 +46,8 @@ public class CharacterAnimationProfile
     [Header("Identity")]
     public VaultCharacter characterId;
     public string         displayName;
+    [TextArea(1, 3)]
+    public string         description;   // Short character tagline shown in character select
     public Color          primaryColor   = Color.white;
     public Color          accentColor    = Color.cyan;
 
@@ -117,6 +119,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.AgentZero,
                 displayName    = "Agent Zero",
+                description    = "Precision operative. Cold. Efficient. Lethal.",
                 primaryColor   = new Color(0.10f, 0.10f, 0.12f),
                 accentColor    = new Color(0.00f, 0.80f, 1.00f),
                 runSpeed       = 1.0f,
@@ -133,6 +136,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.Blaze,
                 displayName    = "Blaze",
+                description    = "Speed is everything. Leaves opponents in the dust.",
                 primaryColor   = new Color(0.90f, 0.30f, 0.00f),
                 accentColor    = new Color(1.00f, 0.80f, 0.00f),
                 runSpeed       = 1.25f,
@@ -149,6 +153,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.Knox,
                 displayName    = "Knox",
+                description    = "Unstoppable force. Obstacles fear him.",
                 primaryColor   = new Color(0.40f, 0.35f, 0.30f),
                 accentColor    = new Color(0.80f, 0.60f, 0.20f),
                 runSpeed       = 0.85f,
@@ -165,6 +170,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.Jade,
                 displayName    = "Jade",
+                description    = "Fluid as water. Deadly as a viper.",
                 primaryColor   = new Color(0.10f, 0.50f, 0.30f),
                 accentColor    = new Color(0.40f, 1.00f, 0.50f),
                 runSpeed       = 1.10f,
@@ -181,6 +187,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.Phantom,
                 displayName    = "Phantom",
+                description    = "You can't hit what you can't see.",
                 primaryColor   = new Color(0.70f, 0.70f, 0.90f),
                 accentColor    = new Color(0.50f, 0.00f, 1.00f),
                 runSpeed       = 1.05f,
@@ -197,6 +204,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.Storm,
                 displayName    = "Storm",
+                description    = "Lightning reflexes. Electric presence.",
                 primaryColor   = new Color(0.15f, 0.15f, 0.50f),
                 accentColor    = new Color(0.60f, 0.80f, 1.00f),
                 runSpeed       = 1.20f,
@@ -213,6 +221,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.Rook,
                 displayName    = "Rook",
+                description    = "Methodical. Calculated. Unstoppable.",
                 primaryColor   = new Color(0.85f, 0.85f, 0.80f),
                 accentColor    = new Color(1.00f, 0.85f, 0.30f),
                 runSpeed       = 0.95f,
@@ -229,6 +238,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.Cipher,
                 displayName    = "Cipher",
+                description    = "The system never saw him coming.",
                 primaryColor   = new Color(0.05f, 0.05f, 0.10f),
                 accentColor    = new Color(0.00f, 1.00f, 0.50f),
                 runSpeed       = 1.15f,
@@ -245,6 +255,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.Vex,
                 displayName    = "Vex",
+                description    = "Chaos is her strategy. Victory is her art.",
                 primaryColor   = new Color(0.60f, 0.00f, 0.40f),
                 accentColor    = new Color(1.00f, 0.00f, 0.80f),
                 runSpeed       = 1.30f,
@@ -261,6 +272,7 @@ public class CharacterDatabase : MonoBehaviour
             {
                 characterId    = VaultCharacter.Titan,
                 displayName    = "Titan",
+                description    = "Slow? Yes. Stopped? Never.",
                 primaryColor   = new Color(0.50f, 0.20f, 0.10f),
                 accentColor    = new Color(1.00f, 0.50f, 0.10f),
                 runSpeed       = 0.75f,

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +8,11 @@ using UnityEngine;
 /// Camera:  45° isometric (euler 45,0,0), orthographic size 6, pos (0,8,-8).
 /// Parallax: Sky 0.2x | Mid 0.6x | Ground 1.0x
 /// Tunnel: Quads tiles recycled ahead of player.
+///
+/// Week 3-4 additions:
+///   • Arena background loading (5 themed parallax sets)
+///   • Smooth cross-fade when switching arena backgrounds
+///   • Per-arena sprite assignments (Assets/Sprites/Arenas/)
 /// </summary>
 public class TunnelGenerator : MonoBehaviour
 {
@@ -244,4 +250,181 @@ public class TunnelGenerator : MonoBehaviour
 
     // ─── Arena Speed ──────────────────────────────────────────────────────────
     public void SetScrollSpeed(float speed) => scrollSpeed = speed;
+
+    // ─── Arena Backgrounds (Week 3-4) ─────────────────────────────────────────
+    /// <summary>
+    /// Arena parallax background definitions.
+    /// Each arena has 3 sprite layers: sky, mid, ground.
+    /// Sprites must be placed in Assets/Sprites/Arenas/.
+    /// </summary>
+    [System.Serializable]
+    public struct ArenaBackground
+    {
+        public GameManager.Arena arena;
+        [Tooltip("Sky layer sprite (scrolls at 0.2x)")]
+        public Sprite skySprite;
+        [Tooltip("Mid layer sprite (scrolls at 0.6x)")]
+        public Sprite midSprite;
+        [Tooltip("Ground layer sprite (scrolls at 1.0x)")]
+        public Sprite groundSprite;
+        [Tooltip("Background tint color")]
+        public Color  ambientColor;
+        [Tooltip("Fog/atmosphere color")]
+        public Color  fogColor;
+    }
+
+    [Header("Arena Backgrounds")]
+    [Tooltip("Assign 5 arena backgrounds — one per rank tier")]
+    public ArenaBackground[] arenaBackgrounds = new ArenaBackground[]
+    {
+        // Defaults — override in Inspector with actual sprites
+        new ArenaBackground { arena = GameManager.Arena.Rookie,  ambientColor = new Color(0.15f,0.15f,0.18f), fogColor = new Color(0.1f,0.1f,0.12f) },
+        new ArenaBackground { arena = GameManager.Arena.Silver,  ambientColor = new Color(0.08f,0.12f,0.10f), fogColor = new Color(0.05f,0.08f,0.06f) },
+        new ArenaBackground { arena = GameManager.Arena.Gold,    ambientColor = new Color(0.20f,0.15f,0.05f), fogColor = new Color(0.15f,0.10f,0.03f) },
+        new ArenaBackground { arena = GameManager.Arena.Diamond, ambientColor = new Color(0.05f,0.10f,0.20f), fogColor = new Color(0.03f,0.06f,0.15f) },
+        new ArenaBackground { arena = GameManager.Arena.Legend,  ambientColor = new Color(0.08f,0.03f,0.15f), fogColor = new Color(0.05f,0.02f,0.10f) },
+    };
+
+    [Header("Background Transition")]
+    [Tooltip("Duration to cross-fade between arena backgrounds")]
+    public float backgroundFadeDuration = 1.0f;
+
+    // ─── Internal background renderers ───────────────────────────────────────
+    private SpriteRenderer _skyRenderer;
+    private SpriteRenderer _midRenderer;
+    private SpriteRenderer _groundRenderer;
+    private Coroutine      _bgFadeRoutine;
+    private GameManager.Arena _currentArena = GameManager.Arena.Rookie;
+
+    /// <summary>
+    /// Load and apply arena background sprites + ambient color.
+    /// Called from GameManager.StartGame() when arena is selected.
+    /// </summary>
+    public void LoadArenaBackground(GameManager.Arena arena)
+    {
+        if (_currentArena == arena && _bgFadeRoutine != null) return;
+
+        _currentArena = arena;
+        ArenaBackground bg = GetArenaBackground(arena);
+
+        Debug.Log($"[TunnelGenerator] Loading arena background: {arena}");
+
+        // Ensure sprite renderer components exist on layer objects
+        EnsureSpriteRenderer(ref _skyRenderer,    skyLayer,    "SkyBG");
+        EnsureSpriteRenderer(ref _midRenderer,    midLayer,    "MidBG");
+        EnsureSpriteRenderer(ref _groundRenderer, groundLayer, "GroundBG");
+
+        if (_bgFadeRoutine != null) StopCoroutine(_bgFadeRoutine);
+        _bgFadeRoutine = StartCoroutine(CrossFadeBackground(bg));
+
+        // Set RenderSettings fog color to match arena
+        RenderSettings.fogColor = bg.fogColor;
+        RenderSettings.ambientLight = bg.ambientColor;
+    }
+
+    void EnsureSpriteRenderer(ref SpriteRenderer sr, Transform layer, string goName)
+    {
+        if (layer == null) return;
+        if (sr != null && sr.transform.IsChildOf(layer)) return;
+
+        // Check if one already exists
+        sr = layer.GetComponentInChildren<SpriteRenderer>();
+        if (sr != null) return;
+
+        // Create one
+        GameObject go = new GameObject(goName);
+        go.transform.SetParent(layer, false);
+        go.transform.localPosition = Vector3.zero;
+        go.transform.localScale    = new Vector3(30f, 18f, 1f);
+        sr = go.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = -10;
+    }
+
+    IEnumerator CrossFadeBackground(ArenaBackground bg)
+    {
+        // Fade out current
+        float elapsed = 0f;
+        float halfDur = backgroundFadeDuration * 0.5f;
+
+        while (elapsed < halfDur)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = 1f - (elapsed / halfDur);
+            SetLayerAlpha(_skyRenderer,    alpha);
+            SetLayerAlpha(_midRenderer,    alpha);
+            SetLayerAlpha(_groundRenderer, alpha);
+            yield return null;
+        }
+
+        // Swap sprites
+        if (_skyRenderer    != null) { _skyRenderer.sprite    = bg.skySprite;    ApplyArenaFallbackColor(_skyRenderer,    bg.ambientColor, 0.4f); }
+        if (_midRenderer    != null) { _midRenderer.sprite    = bg.midSprite;    ApplyArenaFallbackColor(_midRenderer,    bg.ambientColor, 0.6f); }
+        if (_groundRenderer != null) { _groundRenderer.sprite = bg.groundSprite; ApplyArenaFallbackColor(_groundRenderer, bg.ambientColor, 0.8f); }
+
+        // Fade in new
+        elapsed = 0f;
+        while (elapsed < halfDur)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = elapsed / halfDur;
+            SetLayerAlpha(_skyRenderer,    alpha);
+            SetLayerAlpha(_midRenderer,    alpha);
+            SetLayerAlpha(_groundRenderer, alpha);
+            yield return null;
+        }
+
+        SetLayerAlpha(_skyRenderer,    1f);
+        SetLayerAlpha(_midRenderer,    1f);
+        SetLayerAlpha(_groundRenderer, 1f);
+
+        _bgFadeRoutine = null;
+        Debug.Log($"[TunnelGenerator] Arena background loaded: {bg.arena}");
+    }
+
+    void SetLayerAlpha(SpriteRenderer sr, float alpha)
+    {
+        if (sr == null) return;
+        Color c = sr.color;
+        c.a = alpha;
+        sr.color = c;
+    }
+
+    /// <summary>
+    /// When no sprite is assigned, paint a solid color quad so the arena still looks distinct.
+    /// </summary>
+    void ApplyArenaFallbackColor(SpriteRenderer sr, Color baseColor, float brightness)
+    {
+        if (sr == null) return;
+        if (sr.sprite != null) return; // sprite assigned — use it
+
+        sr.color = new Color(
+            baseColor.r * brightness,
+            baseColor.g * brightness,
+            baseColor.b * brightness,
+            1f);
+
+        // Create a white 1x1 pixel sprite as fallback solid color quad
+        if (sr.sprite == null)
+        {
+            Texture2D tex = new Texture2D(1, 1);
+            tex.SetPixel(0, 0, Color.white);
+            tex.Apply();
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), Vector2.one * 0.5f);
+        }
+    }
+
+    ArenaBackground GetArenaBackground(GameManager.Arena arena)
+    {
+        foreach (var bg in arenaBackgrounds)
+            if (bg.arena == arena) return bg;
+        return arenaBackgrounds.Length > 0 ? arenaBackgrounds[0] : default;
+    }
+
+    /// <summary>
+    /// Convenience: called from GameManager when arena is selected.
+    /// </summary>
+    public void ApplyArena(GameManager.Arena arena)
+    {
+        LoadArenaBackground(arena);
+    }
 }

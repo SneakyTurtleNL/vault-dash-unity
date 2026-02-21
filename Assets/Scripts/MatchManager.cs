@@ -413,6 +413,79 @@ public class MatchManager : MonoBehaviour
 #endif
     }
 
+    // ─── Revenge Queue / Rematch ──────────────────────────────────────────────
+    /// <summary>
+    /// Request a rematch against the same opponent (Bart's Revenge Queue design).
+    /// • If opponent is available → start direct match with them
+    /// • If opponent unavailable → fall back to random matchmaking
+    /// • Best-of-3 mode: winner needs 2 wins, prize pool increased
+    /// </summary>
+    public void RequestRematch(string opponentId, bool bestOf3 = false)
+    {
+        if (Status == MatchStatus.InMatch || Status == MatchStatus.Matchmaking)
+        {
+            Debug.LogWarning("[MatchManager] RequestRematch called while already in a match/queue.");
+            return;
+        }
+
+        // Reset match state
+        Status = MatchStatus.Idle;
+        simulatedOpponentProgress = 0f;
+        OpponentHP = 100f;
+
+        bool opponentAvailable = MatchmakingService.IsPlayerAvailable(opponentId);
+
+        Debug.Log($"[MatchManager] Rematch requested vs {opponentId} — Available: {opponentAvailable}, BO3: {bestOf3}");
+
+        if (bestOf3)
+        {
+            // Track best-of-3 state
+            int myBO3Wins  = PlayerPrefs.GetInt("BO3_Win_Me",  0);
+            int oppBO3Wins = PlayerPrefs.GetInt("BO3_Win_Opp", 0);
+            Debug.Log($"[MatchManager] BO3 score: Me {myBO3Wins} — Opp {oppBO3Wins}");
+        }
+
+        if (opponentAvailable && !string.IsNullOrEmpty(opponentId) && opponentId != "offline")
+        {
+#if NAKAMA_AVAILABLE
+            StartDirectMatch(opponentId);
+#else
+            // In offline mode, keep the same opponent name for continuity
+            ReplayOfflineMatch();
+#endif
+        }
+        else
+        {
+            Debug.Log("[MatchManager] Opponent unavailable — falling back to random matchmaking.");
+            FindMatch();
+        }
+    }
+
+    /// <summary>Replay offline match against same bot (keeps opponent name).</summary>
+    void ReplayOfflineMatch()
+    {
+        MatchId   = "offline_" + System.Guid.NewGuid().ToString("N").Substring(0, 8);
+        // Keep OpponentName + OpponentLevel from previous match for continuity
+        Status    = MatchStatus.InMatch;
+        simulatedOpponentProgress = 0f;
+        OpponentHP = 100f;
+
+        Debug.Log($"[MatchManager] Rematch started (offline) vs {OpponentName}");
+        OnMatchStarted();
+    }
+
+#if NAKAMA_AVAILABLE
+    /// <summary>Direct challenge another player by ID (no lobby — instant match).</summary>
+    void StartDirectMatch(string targetId)
+    {
+        // TODO: implement Nakama private match invitation
+        // var match = await _socket.CreateMatchAsync();
+        // Send match ID to target via notification
+        Debug.Log($"[MatchManager] Direct match challenge sent to {targetId}.");
+        StartMatchmaking(); // fallback to queue until direct challenge is implemented
+    }
+#endif
+
     public void LeaveMatch()
     {
 #if NAKAMA_AVAILABLE

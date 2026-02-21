@@ -156,7 +156,11 @@ public class GameManager : MonoBehaviour
         // Apply arena settings
         ArenaSettings settings = GetArenaSettings(selectedArena);
         if (tunnelGenerator != null)
+        {
             tunnelGenerator.SetScrollSpeed(settings.scrollSpeed);
+            // ── Week 3-4: Load arena background ──
+            tunnelGenerator.ApplyArena(selectedArena);
+        }
         if (obstacleManager != null)
             obstacleManager.SetSpawnInterval(settings.obstacleInterval);
 
