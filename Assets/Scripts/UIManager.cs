@@ -36,7 +36,10 @@ public class UIManager : MonoBehaviour
         Profile,
         RankedLadder,
         GameHUD,
-        Victory
+        Victory,
+        // Card System (Phase 1)
+        CardDeck,          // Character card collection grid
+        SkillDeck,         // Skill library + active deck selector
     }
 
     // ─── Panel References ─────────────────────────────────────────────────────
@@ -48,6 +51,10 @@ public class UIManager : MonoBehaviour
     public CanvasGroup rankedLadderPanel;
     public CanvasGroup gameHUDPanel;
     public CanvasGroup victoryPanel;
+
+    [Header("Card System Screens")]
+    public CanvasGroup cardDeckPanel;      // CardDeckScreen root
+    public CanvasGroup skillDeckPanel;     // SkillDeckScreen root
 
     [Header("Transition")]
     [Tooltip("Duration of cross-fade between screens")]
@@ -63,6 +70,8 @@ public class UIManager : MonoBehaviour
     private ShopScreen               _shopScreen;
     private ProfileScreen            _profileScreen;
     private RankedLadderScreen       _rankedLadder;
+    private CardDeckScreen           _cardDeck;
+    private SkillDeckScreen          _skillDeck;
 
     // ─── Init ─────────────────────────────────────────────────────────────────
     void Awake()
@@ -76,6 +85,8 @@ public class UIManager : MonoBehaviour
         if (shopPanel)               _shopScreen    = shopPanel.GetComponent<ShopScreen>();
         if (profilePanel)            _profileScreen = profilePanel.GetComponent<ProfileScreen>();
         if (rankedLadderPanel)       _rankedLadder  = rankedLadderPanel.GetComponent<RankedLadderScreen>();
+        if (cardDeckPanel)           _cardDeck      = cardDeckPanel.GetComponent<CardDeckScreen>();
+        if (skillDeckPanel)          _skillDeck     = skillDeckPanel.GetComponent<SkillDeckScreen>();
 
         // Hide all panels at start
         HideAllImmediate();
@@ -88,13 +99,15 @@ public class UIManager : MonoBehaviour
     }
 
     // ─── Public Navigation API ────────────────────────────────────────────────
-    public void ShowMainMenu()        => Show(Screen.MainMenu);
+    public void ShowMainMenu()           => Show(Screen.MainMenu);
     public void ShowCharacterSelection() => Show(Screen.CharacterSelection);
-    public void ShowShop()            => Show(Screen.Shop);
-    public void ShowProfile()         => Show(Screen.Profile);
-    public void ShowRankedLadder()    => Show(Screen.RankedLadder);
-    public void ShowGameHUD()         => Show(Screen.GameHUD);
-    public void ShowVictory()         => Show(Screen.Victory);
+    public void ShowShop()               => Show(Screen.Shop);
+    public void ShowProfile()            => Show(Screen.Profile);
+    public void ShowRankedLadder()       => Show(Screen.RankedLadder);
+    public void ShowGameHUD()            => Show(Screen.GameHUD);
+    public void ShowVictory()            => Show(Screen.Victory);
+    public void ShowCardDeckScreen()     => Show(Screen.CardDeck);
+    public void ShowSkillDeckScreen()    => Show(Screen.SkillDeck);
 
     public void GoBack()
     {
@@ -135,6 +148,8 @@ public class UIManager : MonoBehaviour
         SetPanel(rankedLadderPanel,      false, immediate: true);
         SetPanel(gameHUDPanel,           false, immediate: true);
         SetPanel(victoryPanel,           false, immediate: true);
+        SetPanel(cardDeckPanel,          false, immediate: true);
+        SetPanel(skillDeckPanel,         false, immediate: true);
     }
 
     void TransitionImmediate(Screen screen)
@@ -201,6 +216,8 @@ public class UIManager : MonoBehaviour
             case Screen.RankedLadder:       return rankedLadderPanel;
             case Screen.GameHUD:            return gameHUDPanel;
             case Screen.Victory:            return victoryPanel;
+            case Screen.CardDeck:           return cardDeckPanel;
+            case Screen.SkillDeck:          return skillDeckPanel;
             default:                        return null;
         }
     }
@@ -213,6 +230,10 @@ public class UIManager : MonoBehaviour
             case Screen.Shop:               _shopScreen?.OnActivate();    break;
             case Screen.Profile:            _profileScreen?.OnActivate(); break;
             case Screen.RankedLadder:       _rankedLadder?.OnActivate();  break;
+            // Card screens activate via OnEnable (MonoBehaviour lifecycle)
+            case Screen.CardDeck:
+            case Screen.SkillDeck:
+                break;
             case Screen.MainMenu:
                 AudioManager.Instance?.PlayMenuMusic();
                 FMODAudioManager.Instance?.PlayMenuMusic();
