@@ -335,14 +335,9 @@ public class VictoryScreen : MonoBehaviour
 
     void SetButtonsInteractable(bool value)
     {
-        if (rematchButton != null)
-        {
-            rematchButton.interactable = value;
-            // Also set canvas group interactable
-            rootCanvasGroup.interactable = value;
-        }
-        if (menuButton != null)
-            menuButton.interactable = value;
+        if (rematchButton != null) rematchButton.interactable = value;
+        if (menuButton    != null) menuButton.interactable    = value;
+        if (rootCanvasGroup != null) rootCanvasGroup.interactable = value;
     }
 
     // ─── Button Callbacks ─────────────────────────────────────────────────────

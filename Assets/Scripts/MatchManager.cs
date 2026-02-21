@@ -269,11 +269,15 @@ public class MatchManager : MonoBehaviour
 
         float opponentSpeed = 4.5f + Random.Range(-0.5f, 0.5f);
         simulatedOpponentProgress += opponentSpeed * Time.deltaTime;
-        OpponentDistance = matchDistance - simulatedOpponentProgress;
+        OpponentDistance = Mathf.Max(0f, matchDistance - simulatedOpponentProgress);
 
         // Simulate HP taking occasional damage
         if (Random.value < 0.001f)
             OpponentHP = Mathf.Max(0f, OpponentHP - 10f);
+
+        // ── Week 2: Did the opponent finish first? ──
+        if (simulatedOpponentProgress >= matchDistance)
+            EndMatch(false);  // player loses
     }
 
     // ─── Match Lifecycle ──────────────────────────────────────────────────────
