@@ -532,7 +532,145 @@ Result: You're vulnerable, but opponent loses control for 2s
 
 ---
 
+---
+
+## 🎨 ASSET INVENTORY + TODO (Scenario.gg + Custom)
+
+### ✅ GENERATED & IN USE (Scenario.gg)
+
+**Characters (10 PNG sets)**
+- [x] Agent Zero (front + back) — Tactical gunmetal grey
+- [x] Blaze (front + back) — Orange speedster
+- [x] Knox (front + back) — Olive green tank
+- [x] Jade (front + back) — Snake-person green/purple
+- [x] Cipher (front) — Hacker archetype
+- [x] Ghost (front) — Ethereal character
+- [x] Nova (front) — Energy character
+- [x] Pulse (front) — Tech character
+- [x] Eclipse (front) — Dark character
+- [x] Phoenix (front) — Fire character
+
+**Status**: Character front views ✅ in use; back views (Agent Zero, Blaze, Knox, Jade) ✅; remaining 6 characters need back view renders
+
+**Arena Backgrounds (5 PNG × 3 layers each = 15 BGs)**
+- [x] Rookie (vault) — Sky/mid/ground layers
+- [x] Silver (sewer) — Sky/mid/ground layers
+- [x] Gold (jungle) — Sky/mid/ground layers
+- [x] Diamond (cyberpunk) — Sky/mid/ground layers
+- [x] Legend (cosmos) — Sky/mid/ground layers
+
+**Assessment (per Bart's question)**:
+- Backgrounds load as parallax layers ✅
+- Subway Surfers parallax vibe ✅
+- 3-layer depth effect ✅
+- Quality sufficient for isometric arcade game ✅
+
+**Other Assets (Scenario.gg Puffy Icons model)**
+- [x] 16 game icons (gem, coin, trophy, etc.)
+- [x] 3 chest models (silver, gold, legendary)
+
+---
+
+### ⚠️ STILL NEEDED (Scenario.gg Renders)
+
+**Back-view sprites (6 characters)**
+- [ ] Cipher_back.png — Hacker archetype (back view)
+- [ ] Ghost_back.png — Ethereal character (back view)
+- [ ] Nova_back.png — Energy character (back view)
+- [ ] Pulse_back.png — Tech character (back view)
+- [ ] Eclipse_back.png — Dark character (back view)
+- [ ] Phoenix_back.png — Fire character (back view)
+
+**Renders needed**: 6 × 1 sample = 6 renders
+**Model**: `model_A4QqSjuzxUe9PmULswqs771G` (character model)
+**Prompts**: Same as front views but "back view, 180° rotation"
+**Strength for img2img**: 0.97+ (force rotation)
+
+**Season Skins (cosmetic variations)**
+- [ ] Cyberpunk Agent Zero — Neon glow, tactical futuristic
+- [ ] Pirate Blaze — Hat, hook, swashbuckling
+- [ ] Samurai Knox — Armor, helmet, Japanese aesthetic
+- [ ] Priestess Jade — Robes, mystical energy
+- [ ] Hacker Cipher — Tech wear, neon effects
+- [ ] Phantom Ghost — Transparent/ethereal overlay
+- (etc., plan for 3-5 skins per character)
+
+**Renders needed**: ~15-20 total (3 per main character × 5-6 characters to start)
+**Model**: Same character model
+**Prompts**: "[Original character], [skin theme] skin, [style description]"
+
+**Particle Effects Sprites (optional, could be procedural)**
+- [ ] Coin burst (small round sprite, yellow)
+- [ ] Gem burst (small diamond sprite, blue/purple)
+- [ ] Power-up glow (radial gradient, color-variant per power-up type)
+- [ ] Collision dust (small gray/brown particles)
+- [ ] Lane-change swoosh (velocity trail particles)
+
+**Renders**: Could use Scenario.gg OR procedural generation (low priority)
+
+**UI Elements**
+- [ ] App icon (512×512, game logo)
+- [ ] Feature graphic (1024×500, Google Play banner)
+- [ ] Loading screen graphic (full-bleed tunnel preview)
+
+**Renders needed**: 3 assets (can be generated via Scenario.gg or custom Figma design)
+
+---
+
+### 📋 GENERATION PLAN (Weekly Batches)
+
+**This week (Week 3-4)**:
+1. Generate 6 back-view sprites (Cipher, Ghost, Nova, Pulse, Eclipse, Phoenix)
+   - Batch 1: 3 renders (Cipher, Ghost, Nova)
+   - Batch 2: 3 renders (Pulse, Eclipse, Phoenix)
+
+2. Generate 3 UI assets (app icon, feature graphic, loading screen)
+   - Batch 3: 3 renders
+
+**Total credit cost**: 6 + 3 = 9 inferences (vs ~8-11 available per Scenario.gg session)
+**Strategy**: Two sessions (Week 3 + Week 4) to stay within quota
+
+**Week 5+ (Season Skins)**:
+1. Batch season skins (3 skins × 5 characters = 15 renders)
+2. Spread across 2-3 weeks (credit efficiency)
+
+---
+
+### ✅ INTEGRATION CHECKLIST
+
+**Already Wired in Code**:
+- [x] Character sprites load from `assets/characters/{id}.png` and `{id}_back.png`
+- [x] Arena BGs load from `assets/arenas/{arena_id}_sky.png` (etc.)
+- [x] Icon sprites load via `GameIcon` widget
+- [x] Chest sprites in chest opening animation
+
+**Still to Wire**:
+- [ ] Back-view sprites (6 characters) → test once generated
+- [ ] Season skins → shop system (week 5)
+- [ ] Particle sprite assets → particle effects system (optional)
+- [ ] UI graphic assets → splash screen, loading screen
+
+---
+
+### 🎮 SUBWAY SURFERS QUALITY ASSESSMENT (per Bart)
+
+**What we have nails the Subway Surfers vibe**:
+- ✅ Isometric perspective (cleaner than side-view)
+- ✅ Parallax 3-layer backgrounds (visual depth)
+- ✅ Character sprite quality (chibi cartoon, Clash Royale style)
+- ✅ Arena thematic consistency (5 unique worlds)
+- ✅ Obstacle design (textured, varied)
+
+**Quality** (1-10): 8/10 — professional arcade game feel
+- Character detail: 8 (smaller than AAA, but crisp + unique)
+- Background polish: 8 (parallax works, thematically consistent)
+- Overall vibe: 9 (isometric camera = BETTER than Subway Surfers' claustrophobic side-view)
+
+**Verdict**: No additional renders needed for MVP. Season skins (week 5) will elevate further.
+
+---
+
 **Created**: 2026-02-20  
 **Owner**: Bart (game designer) + Claude (implementation)  
 **Status**: In Progress  
-**Last Updated**: 2026-02-20 (Advanced Features Added)  
+**Last Updated**: 2026-02-21 (Asset Audit + TODO Added)  
