@@ -4,6 +4,12 @@ using UnityEngine;
 /// <summary>
 /// Player — Core movement system for Vault Dash.
 /// Handles 3-lane switching, jump, crouch, swipe input, animation profiles, and collision.
+///
+/// Week 2 additions:
+///  • AudioManager integration (footsteps, jump, crouch, lane-change, collect SFX)
+///  • CharacterAnimationProfile integration (per-character jump height, speed etc.)
+///  • ParticleEffects integration (collect burst, jump trail)
+///  • Score popup on loot collection
 /// </summary>
 public class Player : MonoBehaviour
 {
@@ -11,6 +17,11 @@ public class Player : MonoBehaviour
     public enum Lane { Left = 0, Center = 1, Right = 2 }
 
     public enum CharacterProfile { AgentZero = 0, Blaze = 1, Knox = 2, Jade = 3 }
+
+    // ─── Week 2: Character Selection ──────────────────────────────────────────
+    [Header("Week 2 — Character Profile")]
+    [Tooltip("VaultCharacter enum index — set from lobby/character selection")]
+    public int selectedCharacterIndex = 0;
 
     // ─── Inspector ────────────────────────────────────────────────────────────
     [Header("Lane Movement")]
@@ -67,11 +78,20 @@ public class Player : MonoBehaviour
         }
     }
 
+    // Week 2 runtime profile (loaded from CharacterDatabase)
+    private CharacterAnimationProfile _activeProfile;
+
     void Start()
     {
         currentLane = Lane.Center;
         targetX     = GetLaneX(currentLane);
+
+        // ── Week 2: Load character profile ──
+        LoadCharacterProfile();
         ApplyAnimationProfile();
+
+        // ── Week 2: Start footstep loop ──
+        AudioManager.Instance?.StartFootsteps();
     }
 
     // ─── Update ───────────────────────────────────────────────────────────────
@@ -134,6 +154,10 @@ public class Player : MonoBehaviour
 
         if (animator != null)
             animator.SetTrigger(dir > 0 ? "SlideRight" : "SlideLeft");
+
+        // ── Week 2 ──
+        AudioManager.Instance?.PlayLaneChange();
+        ParticleEffects.Instance?.LaneSwoosh(transform.position, dir);
     }
 
     float GetLaneX(Lane lane) => ((int)lane - 1) * laneWidth;  // -1, 0, +1
@@ -158,6 +182,10 @@ public class Player : MonoBehaviour
         isJumping = true;
         if (animator != null) animator.SetBool("IsJumping", true);
 
+        // ── Week 2: jump SFX + pause footsteps ──
+        AudioManager.Instance?.PlayJump();
+        AudioManager.Instance?.StopFootsteps();
+
         float elapsed = 0f;
         while (elapsed < jumpDuration)
         {
@@ -169,6 +197,9 @@ public class Player : MonoBehaviour
             pos.y       = height;
             transform.position = pos;
 
+            // ── Week 2: jump trail particles ──
+            ParticleEffects.Instance?.JumpTrail(transform.position, t);
+
             yield return null;
         }
 
@@ -179,6 +210,9 @@ public class Player : MonoBehaviour
 
         if (animator != null) animator.SetBool("IsJumping", false);
         isJumping = false;
+
+        // ── Week 2: resume footsteps ──
+        AudioManager.Instance?.StartFootsteps();
     }
 
     // ─── Crouch ───────────────────────────────────────────────────────────────
@@ -193,6 +227,9 @@ public class Player : MonoBehaviour
     {
         isCrouching = true;
 
+        // ── Week 2: crouch SFX ──
+        AudioManager.Instance?.PlayCrouch();
+
         // Lower collider
         if (playerCollider != null) playerCollider.size = crouchColliderSize;
 
@@ -203,7 +240,9 @@ public class Player : MonoBehaviour
 
         if (animator != null) animator.SetBool("IsCrouching", true);
 
-        yield return new WaitForSeconds(crouchDuration);
+        // Use profile's crouchDuration if available
+        float duration = _activeProfile != null ? _activeProfile.crouchDuration : crouchDuration;
+        yield return new WaitForSeconds(duration);
 
         // Restore
         scale.y = 1f;
@@ -214,18 +253,48 @@ public class Player : MonoBehaviour
         isCrouching = false;
     }
 
+    // ─── Week 2: Load Character Profile ───────────────────────────────────────
+    void LoadCharacterProfile()
+    {
+        if (CharacterDatabase.Instance == null) return;
+
+        int idx = PlayerPrefs.GetInt("SelectedCharacter", selectedCharacterIndex);
+        _activeProfile = CharacterDatabase.Instance.GetProfile(idx);
+
+        if (_activeProfile == null) return;
+
+        // Override jump stats from profile
+        jumpHeight   = _activeProfile.jumpHeight;
+        jumpDuration = _activeProfile.jumpDuration;
+        laneSwitchSpeed *= _activeProfile.laneSwitch;
+
+        // Update footstep cadence
+        AudioManager.Instance?.SetFootstepSpeed(_activeProfile.runSpeed);
+
+        Debug.Log($"[Player] Loaded character profile: {_activeProfile.displayName}");
+    }
+
     // ─── Animation Profiles ───────────────────────────────────────────────────
     void ApplyAnimationProfile()
     {
         if (animator == null) return;
 
-        // Each character has a unique run speed + ID for the animator
-        switch (characterProfile)
+        if (_activeProfile != null)
         {
-            case CharacterProfile.AgentZero: animator.SetFloat("RunSpeed", 1.0f); animator.SetInteger("CharacterID", 0); break;
-            case CharacterProfile.Blaze:     animator.SetFloat("RunSpeed", 1.2f); animator.SetInteger("CharacterID", 1); break;
-            case CharacterProfile.Knox:      animator.SetFloat("RunSpeed", 0.9f); animator.SetInteger("CharacterID", 2); break;
-            case CharacterProfile.Jade:      animator.SetFloat("RunSpeed", 1.1f); animator.SetInteger("CharacterID", 3); break;
+            // Use data from CharacterDatabase (Week 2 path)
+            animator.SetFloat("RunSpeed",    _activeProfile.runSpeed);
+            animator.SetInteger("CharacterID", _activeProfile.animatorId);
+        }
+        else
+        {
+            // Legacy fallback (Week 1 enum)
+            switch (characterProfile)
+            {
+                case CharacterProfile.AgentZero: animator.SetFloat("RunSpeed", 1.0f); animator.SetInteger("CharacterID", 0); break;
+                case CharacterProfile.Blaze:     animator.SetFloat("RunSpeed", 1.2f); animator.SetInteger("CharacterID", 1); break;
+                case CharacterProfile.Knox:      animator.SetFloat("RunSpeed", 0.9f); animator.SetInteger("CharacterID", 2); break;
+                case CharacterProfile.Jade:      animator.SetFloat("RunSpeed", 1.1f); animator.SetInteger("CharacterID", 3); break;
+            }
         }
     }
 
@@ -235,18 +304,53 @@ public class Player : MonoBehaviour
         if (other.CompareTag("Obstacle"))
         {
             if (animator != null) animator.SetTrigger("Die");
+
+            // ── Week 2 ──
+            AudioManager.Instance?.StopFootsteps();
+            AudioManager.Instance?.PlayObstacleHit();
+            ParticleEffects.Instance?.ObstacleBurst(transform.position);
+
             GameManager.Instance?.GameOver();
         }
         else if (other.CompareTag("Coin"))
         {
-            GameManager.Instance?.AddScore(10);
+            int pts = 10;
+            bool combo = false;
+
+            GameManager.Instance?.AddScore(pts);
+
+            // Check combo
+            if (GameManager.Instance != null && GameManager.Instance.ComboMultiplier > 1f)
+            {
+                combo = true;
+                pts = Mathf.RoundToInt(pts * GameManager.Instance.ComboMultiplier);
+            }
+
+            // ── Week 2 ──
+            AudioManager.Instance?.PlayCoinCollect();
+            ParticleEffects.Instance?.CoinBurst(other.transform.position);
+            ParticleEffects.Instance?.ScorePopup(other.transform.position, pts, combo);
+
             Destroy(other.gameObject);
         }
         else if (other.CompareTag("Gem"))
         {
-            GameManager.Instance?.AddScore(50);
+            int pts = 50;
+            GameManager.Instance?.AddScore(pts);
+
+            // ── Week 2 ──
+            AudioManager.Instance?.PlayGemCollect();
+            ParticleEffects.Instance?.GemBurst(other.transform.position);
+            ParticleEffects.Instance?.ScorePopup(other.transform.position, pts, false);
+
             Destroy(other.gameObject);
         }
+    }
+
+    // ─── Cleanup ──────────────────────────────────────────────────────────────
+    void OnDestroy()
+    {
+        AudioManager.Instance?.StopFootsteps();
     }
 
     // ─── Public Accessors ─────────────────────────────────────────────────────

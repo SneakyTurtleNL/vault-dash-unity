@@ -14,6 +14,11 @@ using UnityEngine;
 /// Nakama SDK: add com.heroiclabs.nakama-dotnet to Packages/manifest.json.
 /// Toggle NAKAMA_AVAILABLE define when SDK is present.
 /// Without SDK, this class runs in OFFLINE_MODE (solo practice).
+///
+/// Week 2 additions:
+///  • OpponentVisualizer: SetDistance() every frame + TriggerCollision() at 0m
+///  • AudioManager: UpdateTension() as distance shrinks
+///  • Winner determination: who finished first?
 /// </summary>
 public class MatchManager : MonoBehaviour
 {
@@ -289,13 +294,6 @@ public class MatchManager : MonoBehaviour
         GameManager.Instance?.StartGame();
     }
 
-    void EndMatch(bool youWin)
-    {
-        Status = MatchStatus.Finished;
-        Debug.Log($"[MatchManager] Match ended. Result: {(youWin ? "WIN" : "LOSE")}");
-        GameManager.Instance?.GameOver();
-    }
-
     // ─── Per-Frame Sync ───────────────────────────────────────────────────────
     void Update()
     {
@@ -364,10 +362,16 @@ public class MatchManager : MonoBehaviour
 
     void CheckMatchEnd()
     {
-        float yourDist = GameManager.Instance?.Distance ?? 0f;
+        float yourDist       = GameManager.Instance?.Distance ?? 0f;
+        float remaining      = matchDistance - yourDist;
+        float clampedRemaining = Mathf.Max(0f, remaining);
+
+        // ── Week 2: Drive OpponentVisualizer with current distance ──
+        OpponentVisualizer.Instance?.SetDistance(clampedRemaining);
+
         if (yourDist >= matchDistance)
         {
-            // You finished!
+            // You finished first!
 #if NAKAMA_AVAILABLE
             if (_socket != null && _match != null)
             {
@@ -378,6 +382,20 @@ public class MatchManager : MonoBehaviour
 #endif
             EndMatch(true);
         }
+    }
+
+    void EndMatch(bool youWin)
+    {
+        if (Status == MatchStatus.Finished) return; // guard double-call
+        Status = MatchStatus.Finished;
+
+        Debug.Log($"[MatchManager] Match ended. Result: {(youWin ? "WIN" : "LOSE")}");
+
+        // ── Week 2: Trigger visual collision + victory screen ──
+        if (OpponentVisualizer.Instance != null)
+            OpponentVisualizer.Instance.TriggerCollision(youWin);
+        else
+            GameManager.Instance?.GameOver(); // fallback
     }
 
     // ─── Public API ───────────────────────────────────────────────────────────

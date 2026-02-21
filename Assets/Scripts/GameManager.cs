@@ -6,6 +6,11 @@ using UnityEngine.SceneManagement;
 /// GameManager — Core game-flow controller for Vault Dash.
 /// Manages state machine (Menu → Playing → GameOver), scoring, arenas, and player spawn.
 /// Singleton: persists across scenes.
+///
+/// Week 2 additions:
+///  • AudioManager: start/stop music on state change
+///  • OpponentVisualizer: reset on new match
+///  • VictoryScreen: route GameOver through VictoryScreen when in a match
 /// </summary>
 public class GameManager : MonoBehaviour
 {
@@ -104,6 +109,9 @@ public class GameManager : MonoBehaviour
                 ShowScreen(startScreen, true);
                 ShowScreen(gameOverScreen, false);
                 ShowScreen(pauseScreen, false);
+                // ── Week 2 ──
+                AudioManager.Instance?.StopFootsteps();
+                AudioManager.Instance?.PlayMenuMusic();
                 break;
 
             case GameState.Playing:
@@ -111,6 +119,8 @@ public class GameManager : MonoBehaviour
                 ShowScreen(startScreen, false);
                 ShowScreen(gameOverScreen, false);
                 ShowScreen(pauseScreen, false);
+                // ── Week 2 ──
+                AudioManager.Instance?.PlayMatchMusic();
                 break;
 
             case GameState.Paused:
@@ -135,6 +145,9 @@ public class GameManager : MonoBehaviour
         ComboMultiplier  = 1f;
         consecutiveLoot  = 0;
         runTimer         = 0f;
+
+        // ── Week 2: reset opponent visualizer ──
+        OpponentVisualizer.Instance?.ResetVisualizer();
 
         // Apply arena settings
         ArenaSettings settings = GetArenaSettings(selectedArena);
