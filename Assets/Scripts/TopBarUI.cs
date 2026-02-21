@@ -36,6 +36,14 @@ public class TopBarUI : MonoBehaviour
     public Image       opponentSkillIcon;
     public TMP_Text    opponentSkillCooldown;
 
+    [Header("Opponent Prestige Badge")]
+    [Tooltip("PrestigeBadge component on the opponent side of top bar")]
+    public PrestigeBadge opponentPrestigeBadge;
+    [Tooltip("Standalone: opponent tier text (e.g. '💎 DIAMOND ⭐⭐')")]
+    public TMP_Text    opponentTierText;
+    [Tooltip("Opponent character image — tinted purple if opponent has prestige")]
+    public Image       opponentCharacterGlow;
+
     // ─── Distance ─────────────────────────────────────────────────────────────
     [Header("Distance")]
     public TMP_Text    distanceText;     // "342m"
@@ -48,6 +56,10 @@ public class TopBarUI : MonoBehaviour
     [HideInInspector] public int    yourLevel      = 1;
     [HideInInspector] public string opponentName  = "OPPONENT";
     [HideInInspector] public int    opponentLevel  = 1;
+
+    // Opponent prestige data — set via SetOpponentPrestige() from MatchManager
+    [HideInInspector] public int    opponentPrestigeLevel = 0;
+    [HideInInspector] public int    opponentTrophies      = 0;
 
     // HP values (0–100)
     [HideInInspector] public float  yourHP         = 100f;
@@ -97,6 +109,50 @@ public class TopBarUI : MonoBehaviour
         SafeSetText(yourLevelText,    $"Lvl {yourLevel}");
         SafeSetText(opponentNameText, opponentName);
         SafeSetText(opponentLevelText,$"Lvl {opponentLevel}");
+    }
+
+    /// <summary>
+    /// Set opponent prestige data. Call from MatchManager when opponent data arrives.
+    /// Refreshes the badge + glow in the top bar.
+    /// </summary>
+    public void SetOpponentPrestige(int prestigeLevel, int trophies)
+    {
+        opponentPrestigeLevel = prestigeLevel;
+        opponentTrophies      = trophies;
+        RefreshOpponentPrestige();
+    }
+
+    void RefreshOpponentPrestige()
+    {
+        // PrestigeBadge component path
+        if (opponentPrestigeBadge != null)
+        {
+            opponentPrestigeBadge.SetPrestige(opponentPrestigeLevel, opponentTrophies);
+        }
+
+        // Standalone tier text fallback
+        if (opponentTierText != null)
+        {
+            var tier  = RankedProgressionManager.GetTierForTrophies(opponentTrophies);
+            string stars = RankedProgressionManager.GetPrestigeStars(opponentPrestigeLevel);
+            opponentTierText.text  = opponentPrestigeLevel > 0
+                ? $"{tier.emoji} {tier.name} {stars}"
+                : $"{tier.emoji} {tier.name}";
+            opponentTierText.color = tier.color;
+        }
+
+        // Purple glow on opponent character image (built-in UI tinting, no shader needed)
+        if (opponentCharacterGlow != null)
+        {
+            if (opponentPrestigeLevel > 0)
+                opponentCharacterGlow.color = RankedProgressionManager.GetPrestigeGlowColor(opponentPrestigeLevel);
+            else
+                opponentCharacterGlow.color = Color.white;
+        }
+
+        // Also tint via PrestigeBadge helper
+        if (opponentPrestigeBadge != null && opponentSkinPreview != null)
+            opponentPrestigeBadge.ApplyGlowToCharacter(opponentSkinPreview);
     }
 
     public void SetYourHP(float hp)

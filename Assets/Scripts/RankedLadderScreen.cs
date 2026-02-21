@@ -25,13 +25,22 @@ public class RankedLadderScreen : MonoBehaviour
     public Slider       rankProgressBar;
     public Image        rankIconImage;
     public TMP_Text     playerPositionText;     // "#47 globally"
+
+    [Header("Prestige in Rank Card")]
+    [Tooltip("Shows prestige level + stars on the rank card")]
+    public PrestigeBadge rankCardPrestigeBadge;
+    public TMP_Text     rankPrestigeLevelText;  // "Prestige 3"
+    public TMP_Text     rankPrestigeStarsText;  // "⭐⭐⭐"
+    public GameObject   rankPrestigeSection;    // hidden if prestige == 0
+
     public Color[]      rankColors = new Color[]
     {
-        new Color(0.7f, 0.7f, 0.7f),  // Rookie (grey)
-        new Color(0.8f, 0.85f, 0.9f), // Silver (silver)
-        new Color(0.9f, 0.75f, 0.1f), // Gold   (gold)
-        new Color(0.4f, 0.7f, 1.0f),  // Diamond (blue)
-        new Color(0.85f, 0.5f, 1.0f), // Legend (purple)
+        new Color(0.68f, 0.68f, 0.68f), // Rookie  (grey)
+        new Color(0.80f, 0.85f, 0.90f), // Silver  (silver)
+        new Color(0.90f, 0.75f, 0.10f), // Gold    (gold)
+        new Color(0.40f, 0.70f, 1.00f), // Diamond (blue)
+        new Color(0.80f, 0.40f, 1.00f), // Master  (purple)
+        new Color(1.00f, 0.84f, 0.00f), // Legend  (gold/yellow)
     };
 
     [Header("Leaderboard")]
@@ -51,7 +60,9 @@ public class RankedLadderScreen : MonoBehaviour
     public Button       playRankedButton;
     public Button       backButton;
 
-    // ─── Rank Tiers ──────────────────────────────────────────────────────────
+    // ─── Rank Tiers — delegate to RankedProgressionManager ──────────────────
+    // NOTE: RankTier struct kept for leaderboard rows (local usage only).
+    //       Source of truth is RankedProgressionManager.TIERS.
     [System.Serializable]
     public struct RankTier
     {
@@ -59,15 +70,18 @@ public class RankedLadderScreen : MonoBehaviour
         public int    minTrophies;
         public int    maxTrophies;
         public Color  color;
+        public string emoji;
     }
 
+    // Mirrors RankedProgressionManager.TIERS for backwards-compatible local use
     private static readonly RankTier[] RANKS = new RankTier[]
     {
-        new RankTier { name = "Rookie",  minTrophies = 0,    maxTrophies = 499  },
-        new RankTier { name = "Silver",  minTrophies = 500,  maxTrophies = 999  },
-        new RankTier { name = "Gold",    minTrophies = 1000, maxTrophies = 1999 },
-        new RankTier { name = "Diamond", minTrophies = 2000, maxTrophies = 3499 },
-        new RankTier { name = "Legend",  minTrophies = 3500, maxTrophies = 99999},
+        new RankTier { name = "Rookie",  emoji = "🥉", minTrophies = 0,    maxTrophies = 499,   color = new Color(0.68f, 0.68f, 0.68f) },
+        new RankTier { name = "Silver",  emoji = "🥈", minTrophies = 500,  maxTrophies = 999,   color = new Color(0.80f, 0.85f, 0.90f) },
+        new RankTier { name = "Gold",    emoji = "🥇", minTrophies = 1000, maxTrophies = 1999,  color = new Color(0.90f, 0.75f, 0.10f) },
+        new RankTier { name = "Diamond", emoji = "💎", minTrophies = 2000, maxTrophies = 3499,  color = new Color(0.40f, 0.70f, 1.00f) },
+        new RankTier { name = "Master",  emoji = "🔮", minTrophies = 3500, maxTrophies = 4499,  color = new Color(0.80f, 0.40f, 1.00f) },
+        new RankTier { name = "Legend",  emoji = "👑", minTrophies = 4500, maxTrophies = 99999, color = new Color(1.00f, 0.84f, 0.00f) },
     };
 
     // ─── Private ──────────────────────────────────────────────────────────────
@@ -82,7 +96,14 @@ public class RankedLadderScreen : MonoBehaviour
         public string playerName;
         public int    trophies;
         public string rankName;
+        public int    prestigeLevel;   // 0 = no prestige
         public bool   isLocalPlayer;
+
+        /// <summary>Display string: emoji + tier name (+ stars if prestige)</summary>
+        public string DisplayRank =>
+            prestigeLevel > 0
+                ? $"{rankName} {RankedProgressionManager.GetPrestigeStars(prestigeLevel)}"
+                : rankName;
     }
 
     // ─── Init ─────────────────────────────────────────────────────────────────
@@ -100,53 +121,107 @@ public class RankedLadderScreen : MonoBehaviour
     // ─── Activation ───────────────────────────────────────────────────────────
     public void OnActivate()
     {
+        // Subscribe to live prestige updates
+        if (RankedProgressionManager.Instance != null)
+        {
+            RankedProgressionManager.Instance.OnProgressionChanged -= OnProgressionChanged;
+            RankedProgressionManager.Instance.OnProgressionChanged += OnProgressionChanged;
+        }
+
         RefreshRankCard();
         StartCoroutine(LoadLeaderboard());
+    }
+
+    void OnDisable()
+    {
+        if (RankedProgressionManager.Instance != null)
+            RankedProgressionManager.Instance.OnProgressionChanged -= OnProgressionChanged;
+    }
+
+    void OnProgressionChanged(RankedProgressionManager.ProgressionState _)
+    {
+        RefreshRankCard();
     }
 
     // ─── Rank Card ────────────────────────────────────────────────────────────
     void RefreshRankCard()
     {
-        int trophies = PlayerPrefs.GetInt("VaultDash_Trophies", 0);
+        // Prefer live RankedProgressionManager data; fall back to PlayerPrefs
+        int trophies = RankedProgressionManager.Instance?.State.trophies
+                       ?? PlayerPrefs.GetInt("VaultDash_Trophies", 0);
+        int prestige = RankedProgressionManager.Instance?.State.prestigeLevel
+                       ?? PlayerPrefs.GetInt("VaultDash_PrestigeLevel", 0);
+
         RankTier tier = GetRankTier(trophies);
 
-        if (rankNameText    != null) rankNameText.text    = tier.name.ToUpper();
+        // Rank name (include prestige marker)
+        if (rankNameText != null)
+        {
+            rankNameText.text  = prestige > 0
+                ? $"{tier.emoji} {tier.name.ToUpper()}  ⭐{prestige}"
+                : $"{tier.emoji} {tier.name.ToUpper()}";
+            rankNameText.color = tier.color;
+        }
+
         if (trophyCountText != null) trophyCountText.text = $"🏆 {trophies:N0}";
 
         // Progress to next rank
-        int toNext = tier.maxTrophies - trophies;
         if (tier.name == "Legend")
         {
-            if (rankProgressText != null) rankProgressText.text = "MAX RANK — LEGEND 🌟";
-            if (rankProgressBar  != null) rankProgressBar.value = 1f;
+            if (rankProgressText != null)
+            {
+                rankProgressText.text = prestige > 0
+                    ? $"👑 LEGEND MAX  •  Prestige {prestige} Active"
+                    : "👑 MAX RANK — LEGEND  •  Prestige available!";
+            }
+            if (rankProgressBar != null) rankProgressBar.value = 1f;
         }
         else
         {
-            string nextRank = GetNextRank(tier);
-            int tierRange   = tier.maxTrophies - tier.minTrophies;
-            int progress    = trophies - tier.minTrophies;
+            int toNext    = tier.maxTrophies - trophies + 1;
+            string nextRk = GetNextRank(tier);
+            int tierRange = tier.maxTrophies - tier.minTrophies;
+            int progress  = trophies - tier.minTrophies;
 
             if (rankProgressText != null)
-                rankProgressText.text = $"{toNext} 🏆 to {nextRank}";
+                rankProgressText.text = $"{toNext} 🏆 to {nextRk}";
             if (rankProgressBar != null)
                 rankProgressBar.value = tierRange > 0 ? (float)progress / tierRange : 0f;
         }
 
-        // Color rank bar
+        // Bar + icon tint
         if (rankProgressBar != null)
         {
             var fill = rankProgressBar.fillRect?.GetComponent<Image>();
             if (fill != null) fill.color = tier.color;
         }
-
-        // Rank icon tint
         if (rankIconImage != null) rankIconImage.color = tier.color;
 
-        // Simulated position
+        // Simulated leaderboard position
         if (playerPositionText != null)
         {
             int fakePosition = Mathf.Max(1, 1000 - trophies / 4);
             playerPositionText.text = $"#{fakePosition:N0} globally";
+        }
+
+        // ─── Prestige section ─────────────────────────────────────────────────
+        if (rankCardPrestigeBadge != null)
+        {
+            rankCardPrestigeBadge.SetPrestige(prestige, trophies);
+        }
+        else
+        {
+            // Standalone fallback fields
+            if (rankPrestigeSection != null)
+                rankPrestigeSection.SetActive(prestige > 0);
+
+            if (prestige > 0)
+            {
+                if (rankPrestigeLevelText != null)
+                    rankPrestigeLevelText.text = RankedProgressionManager.GetPrestigeLabel(prestige);
+                if (rankPrestigeStarsText != null)
+                    rankPrestigeStarsText.text = RankedProgressionManager.GetPrestigeStars(prestige);
+            }
         }
     }
 
@@ -181,7 +256,6 @@ public class RankedLadderScreen : MonoBehaviour
 
     IEnumerator GenerateSimulatedLeaderboard()
     {
-        // Simulate network delay
         yield return new WaitForSecondsRealtime(0.5f);
 
         string[] fakeNames = {
@@ -191,24 +265,31 @@ public class RankedLadderScreen : MonoBehaviour
             "DiamondDash","LegendaryRun","VaultElite","RankedGod","TopRunner"
         };
 
-        int localTrophies = PlayerPrefs.GetInt("VaultDash_Trophies", 0);
-        string localName  = PlayerPrefs.GetString("VaultDash_PlayerName", "You");
-        bool placed       = false;
+        int localTrophies  = RankedProgressionManager.Instance?.State.trophies
+                             ?? PlayerPrefs.GetInt("VaultDash_Trophies", 0);
+        int localPrestige  = RankedProgressionManager.Instance?.State.prestigeLevel
+                             ?? PlayerPrefs.GetInt("VaultDash_PrestigeLevel", 0);
+        string localName   = PlayerPrefs.GetString("VaultDash_PlayerName", "You");
+        bool placed        = false;
 
         for (int i = 1; i <= displayCount; i++)
         {
-            // Simulate trophy distribution: top players have lots of trophies
-            int fakeTrophies = Mathf.Max(0, 5000 - (i * 45) + UnityEngine.Random.Range(-20, 20));
+            // Top players: high trophies + possible prestige
+            int fakeTrophies  = Mathf.Max(0, 6000 - (i * 55) + UnityEngine.Random.Range(-30, 30));
+            // Top 20 players might have prestige
+            int fakePrestige  = (i <= 20 && fakeTrophies >= RankedProgressionManager.PRESTIGE_THRESHOLD)
+                ? UnityEngine.Random.Range(1, Mathf.Max(2, 6 - i / 4))
+                : 0;
 
-            // Insert local player at correct position
             if (!placed && fakeTrophies <= localTrophies)
             {
                 _entries.Add(new LeaderboardEntry
                 {
-                    rank        = _entries.Count + 1,
-                    playerName  = localName,
-                    trophies    = localTrophies,
-                    rankName    = GetRankTier(localTrophies).name,
+                    rank          = _entries.Count + 1,
+                    playerName    = localName,
+                    trophies      = localTrophies,
+                    rankName      = GetRankTier(localTrophies).name,
+                    prestigeLevel = localPrestige,
                     isLocalPlayer = true
                 });
                 placed = true;
@@ -216,10 +297,11 @@ public class RankedLadderScreen : MonoBehaviour
 
             _entries.Add(new LeaderboardEntry
             {
-                rank       = _entries.Count + 1,
-                playerName = fakeNames[UnityEngine.Random.Range(0, fakeNames.Length)] + UnityEngine.Random.Range(10, 9999),
-                trophies   = fakeTrophies,
-                rankName   = GetRankTier(fakeTrophies).name,
+                rank          = _entries.Count + 1,
+                playerName    = fakeNames[UnityEngine.Random.Range(0, fakeNames.Length)] + UnityEngine.Random.Range(10, 9999),
+                trophies      = fakeTrophies,
+                rankName      = GetRankTier(fakeTrophies).name,
+                prestigeLevel = fakePrestige,
                 isLocalPlayer = false
             });
 
@@ -234,6 +316,7 @@ public class RankedLadderScreen : MonoBehaviour
                 playerName    = localName,
                 trophies      = localTrophies,
                 rankName      = GetRankTier(localTrophies).name,
+                prestigeLevel = localPrestige,
                 isLocalPlayer = true
             });
         }
@@ -257,6 +340,8 @@ public class RankedLadderScreen : MonoBehaviour
 
         foreach (var entry in _entries)
         {
+            var localRankTier = GetRankTier(entry.trophies);
+
             if (leaderboardRowPrefab != null)
             {
                 GameObject row = Instantiate(leaderboardRowPrefab, leaderboardContainer);
@@ -264,18 +349,34 @@ public class RankedLadderScreen : MonoBehaviour
                 var nameLabel   = row.transform.Find("Name")?.GetComponent<TMP_Text>();
                 var trophyLabel = row.transform.Find("Trophies")?.GetComponent<TMP_Text>();
                 var rankBadge   = row.transform.Find("RankBadge")?.GetComponent<TMP_Text>();
+                var starsLabel  = row.transform.Find("Stars")?.GetComponent<TMP_Text>();  // optional
                 var rowImg      = row.GetComponent<Image>();
 
                 if (rankLabel   != null) rankLabel.text   = $"#{entry.rank}";
-                if (nameLabel   != null) nameLabel.text   = entry.playerName;
+                if (nameLabel   != null)
+                {
+                    // Purple star prefix for prestige players
+                    nameLabel.text = entry.prestigeLevel > 0
+                        ? $"⭐ {entry.playerName}"
+                        : entry.playerName;
+                }
                 if (trophyLabel != null) trophyLabel.text = $"🏆 {entry.trophies:N0}";
-                if (rankBadge   != null) rankBadge.text   = entry.rankName;
+                if (rankBadge   != null)
+                {
+                    rankBadge.text  = entry.DisplayRank;
+                    rankBadge.color = localRankTier.color;
+                }
+                if (starsLabel != null)
+                {
+                    starsLabel.text = RankedProgressionManager.GetPrestigeStars(entry.prestigeLevel);
+                    starsLabel.gameObject.SetActive(entry.prestigeLevel > 0);
+                }
 
                 // Highlight local player row
                 if (rowImg != null && entry.isLocalPlayer)
                     rowImg.color = new Color(0.9f, 0.75f, 0.1f, 0.25f);
 
-                // Top 3 gold/silver/bronze highlights
+                // Top 3 medal overrides
                 if (entry.rank <= 3 && rankLabel != null)
                 {
                     string medal = entry.rank == 1 ? "🥇" : entry.rank == 2 ? "🥈" : "🥉";
@@ -285,14 +386,16 @@ public class RankedLadderScreen : MonoBehaviour
             else
             {
                 // Fallback: text row
+                string stars = RankedProgressionManager.GetPrestigeStars(entry.prestigeLevel);
+                string prestigeTag = entry.prestigeLevel > 0 ? $" [{stars}P{entry.prestigeLevel}]" : "";
                 GameObject go = new GameObject($"Row_{entry.rank}");
                 go.transform.SetParent(leaderboardContainer, false);
                 var text = go.AddComponent<TMP_Text>();
-                text.text = $"#{entry.rank,-4}  {entry.playerName,-20}  🏆{entry.trophies,6}  {entry.rankName}";
+                text.text = $"#{entry.rank,-4}  {entry.playerName,-20}  🏆{entry.trophies,6}  {entry.rankName}{prestigeTag}";
                 text.fontSize = 13;
                 text.color = entry.isLocalPlayer
                     ? new Color(0.9f, 0.75f, 0.1f)
-                    : Color.white;
+                    : (entry.prestigeLevel > 0 ? new Color(0.8f, 0.5f, 1.0f) : Color.white);
                 var rt = go.GetComponent<RectTransform>();
                 rt.sizeDelta = new Vector2(700f, 35f);
             }
@@ -323,12 +426,19 @@ public class RankedLadderScreen : MonoBehaviour
             "🏆 RANKED MODE — HOW IT WORKS\n\n" +
             "Win → +10 to +35 trophies (based on opponent rank)\n" +
             "Lose → -5 to -15 trophies\n\n" +
-            "RANKS:\n" +
-            "🥉 Rookie       0–499 trophies\n" +
-            "🥈 Silver     500–999 trophies\n" +
-            "🥇 Gold    1,000–1,999 trophies\n" +
-            "💎 Diamond 2,000–3,499 trophies\n" +
-            "🌟 Legend    3,500+ trophies\n\n" +
+            "TIERS:\n" +
+            "🥉 Rookie         0 – 499 trophies\n" +
+            "🥈 Silver       500 – 999 trophies\n" +
+            "🥇 Gold      1,000 – 1,999 trophies\n" +
+            "💎 Diamond   2,000 – 3,499 trophies\n" +
+            "🔮 Master    3,500 – 4,499 trophies\n" +
+            "👑 Legend      4,500+ trophies\n\n" +
+            "✨ PRESTIGE SYSTEM\n" +
+            "Reach Legend (4,500+) and prestige!\n" +
+            "• Reset to Rookie with a Prestige badge\n" +
+            "• Earn ⭐ stars for each prestige level\n" +
+            "• Purple glow on your character in 1v1\n" +
+            "• Prestige is permanent — reset as many times as you want!\n\n" +
             "Season resets at the start of each season.\n" +
             "Top 100 players earn exclusive season rewards!";
     }
@@ -345,7 +455,7 @@ public class RankedLadderScreen : MonoBehaviour
     {
         for (int i = 0; i < RANKS.Length - 1; i++)
             if (RANKS[i].name == current.name) return RANKS[i + 1].name;
-        return "MAX";
+        return current.name == "Legend" ? "PRESTIGE" : "MAX";
     }
 
     // ─── Navigation ───────────────────────────────────────────────────────────

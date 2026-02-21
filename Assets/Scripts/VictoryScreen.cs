@@ -49,6 +49,15 @@ public class VictoryScreen : MonoBehaviour
     public TMP_Text distanceText;       // "500m cleared!"
     public TMP_Text rewardText;         // "Reward: 250 coins"
 
+    [Header("Tier Progression Bar (Post-Match)")]
+    [Tooltip("Attach a TierProgressionBar component on a Slider. Shows tier progress after match.")]
+    public TierProgressionBar tierProgressionBar;
+    [Tooltip("Optional: prestige popup panel shown when player is eligible")]
+    public GameObject prestigePromptPanel;
+    public TMP_Text   prestigePromptText;
+    public UnityEngine.UI.Button prestigeConfirmButton;
+    public UnityEngine.UI.Button prestigeCancelButton;
+
     [Header("Confetti")]
     public ParticleSystem confettiParticles;
 
@@ -271,14 +280,55 @@ public class VictoryScreen : MonoBehaviour
         if (distanceText   != null) distanceText.text   = $"{Mathf.RoundToInt(dist)}m cleared";
 
         int trophyChange = playerWon ? CalculateTrophyGain(score) : -CalculateTrophyLoss(score);
-        UpdateTrophies(trophyChange);
 
+        // ─── Trophy + Tier update via RankedProgressionManager ────────────────
+        int oldTrophies = RankedProgressionManager.Instance != null
+            ? RankedProgressionManager.Instance.State.trophies
+            : PlayerPrefs.GetInt("VaultDash_Trophies", 0);
+
+        UpdateTrophies(trophyChange);   // writes to PlayerPrefs + RankedProgressionManager
+
+        int newTrophies = RankedProgressionManager.Instance != null
+            ? RankedProgressionManager.Instance.State.trophies
+            : PlayerPrefs.GetInt("VaultDash_Trophies", 0);
+
+        // ─── Trophies text ────────────────────────────────────────────────────
         if (trophiesText != null)
         {
             trophiesText.text  = trophyChange >= 0 ? $"+{trophyChange} 🏆" : $"{trophyChange} 🏆";
-            trophiesText.color = trophyChange >= 0 ? new Color(0.9f, 0.75f, 0.1f) : new Color(0.7f, 0.3f, 0.3f);
+            trophiesText.color = trophyChange >= 0
+                ? new Color(0.9f, 0.75f, 0.1f)
+                : new Color(0.7f, 0.3f, 0.3f);
         }
 
+        // ─── Tier progression bar ─────────────────────────────────────────────
+        if (tierProgressionBar != null)
+            tierProgressionBar.Show(oldTrophies, newTrophies);
+
+        // ─── Rank text ────────────────────────────────────────────────────────
+        if (rankText != null)
+        {
+            var oldTier = RankedProgressionManager.GetTierForTrophies(oldTrophies);
+            var newTier = RankedProgressionManager.GetTierForTrophies(newTrophies);
+
+            if (oldTier.tier != newTier.tier && trophyChange > 0)
+            {
+                rankText.text  = $"🎉 Promoted to {newTier.emoji} {newTier.name}!";
+                rankText.color = newTier.color;
+            }
+            else if (oldTier.tier != newTier.tier && trophyChange < 0)
+            {
+                rankText.text  = $"⬇️ Dropped to {newTier.emoji} {newTier.name}";
+                rankText.color = new Color(0.7f, 0.3f, 0.3f);
+            }
+            else
+            {
+                rankText.text  = playerWon ? "Keep climbing! 🚀" : "Better luck next time!";
+                rankText.color = Color.white;
+            }
+        }
+
+        // ─── Rewards ──────────────────────────────────────────────────────────
         if (rewardText != null)
         {
             int coins = playerWon ? 250 + (score / 10) : 50;
@@ -286,12 +336,18 @@ public class VictoryScreen : MonoBehaviour
             GrantCoins(coins);
         }
 
-        if (rankText != null) rankText.text = playerWon ? "Keep climbing! 🚀" : "Better luck next time!";
-
         yield return StartCoroutine(AnimateStatText(finalScoreText));
         yield return StartCoroutine(AnimateStatText(trophiesText));
         yield return new WaitForSecondsRealtime(0.1f);
         yield return StartCoroutine(AnimateStatText(rewardText));
+
+        // ─── Prestige prompt (if eligible) ────────────────────────────────────
+        if (RankedProgressionManager.Instance != null
+            && RankedProgressionManager.Instance.State.prestigeAvailable)
+        {
+            yield return new WaitForSecondsRealtime(0.5f);
+            ShowPrestigePrompt();
+        }
     }
 
     IEnumerator AnimateStatText(TMP_Text label)
@@ -410,11 +466,64 @@ public class VictoryScreen : MonoBehaviour
     // ─── Trophy + Coin Logic ──────────────────────────────────────────────────
     void UpdateTrophies(int delta)
     {
-        int current = PlayerPrefs.GetInt("VaultDash_Trophies", 0);
-        int updated = Mathf.Max(0, current + delta);
-        PlayerPrefs.SetInt("VaultDash_Trophies", updated);
-        PlayerPrefs.Save();
-        Debug.Log($"[VictoryScreen] Trophies: {current} → {updated} (Δ{delta})");
+        if (RankedProgressionManager.Instance != null)
+        {
+            // Authoritative path — manager handles Firestore + tier events
+            int before = RankedProgressionManager.Instance.State.trophies;
+            RankedProgressionManager.Instance.AddTrophies(delta);
+            int after  = RankedProgressionManager.Instance.State.trophies;
+            Debug.Log($"[VictoryScreen] Trophies (via Manager): {before} → {after} (Δ{delta})");
+        }
+        else
+        {
+            // Fallback — manager not in scene
+            int current = PlayerPrefs.GetInt("VaultDash_Trophies", 0);
+            int updated = Mathf.Max(0, current + delta);
+            PlayerPrefs.SetInt("VaultDash_Trophies", updated);
+            PlayerPrefs.Save();
+            Debug.Log($"[VictoryScreen] Trophies (local): {current} → {updated} (Δ{delta})");
+        }
+    }
+
+    // ─── Prestige Prompt ──────────────────────────────────────────────────────
+    void ShowPrestigePrompt()
+    {
+        if (prestigePromptPanel == null) return;
+
+        int prestige = RankedProgressionManager.Instance?.State.prestigeLevel ?? 0;
+        int nextPrestige = prestige + 1;
+
+        if (prestigePromptText != null)
+        {
+            prestigePromptText.text =
+                $"🌟 PRESTIGE AVAILABLE!\n\n" +
+                $"You've conquered Legend.\n" +
+                $"Reset to Rookie and earn Prestige {nextPrestige}.\n\n" +
+                $"{RankedProgressionManager.GetPrestigeStars(nextPrestige)} ({nextPrestige} star{(nextPrestige > 1 ? "s" : "")})\n" +
+                $"Purple glow unlocks on your character!\n\n" +
+                $"Ready to prove yourself again?";
+        }
+
+        if (prestigeConfirmButton != null)
+        {
+            prestigeConfirmButton.onClick.RemoveAllListeners();
+            prestigeConfirmButton.onClick.AddListener(() =>
+            {
+                RankedProgressionManager.Instance?.ExecutePrestige();
+                if (prestigePromptPanel != null) prestigePromptPanel.SetActive(false);
+            });
+        }
+
+        if (prestigeCancelButton != null)
+        {
+            prestigeCancelButton.onClick.RemoveAllListeners();
+            prestigeCancelButton.onClick.AddListener(() =>
+            {
+                if (prestigePromptPanel != null) prestigePromptPanel.SetActive(false);
+            });
+        }
+
+        prestigePromptPanel.SetActive(true);
     }
 
     void GrantCoins(int coins)

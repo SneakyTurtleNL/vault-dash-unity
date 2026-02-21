@@ -25,6 +25,13 @@ public class ProfileScreen : MonoBehaviour
     public Image     playerAvatarImage;
     public TMP_Text  gemBalanceText;
 
+    [Header("Prestige Badge")]
+    [Tooltip("Attach a PrestigeBadge component here — auto-refreshed on activate")]
+    public PrestigeBadge prestigeBadge;
+    public TMP_Text  prestigeTierText;    // e.g. "⭐⭐ DIAMOND" (standalone fallback)
+    public TMP_Text  prestigeStarsText;   // standalone star row
+    public Image     prestigeGlowRing;   // paarse ring rond avatar (optional)
+
     [Header("Section Tabs")]
     public Button    tabStatsButton;
     public Button    tabMasteryButton;
@@ -115,14 +122,62 @@ public class ProfileScreen : MonoBehaviour
     void RefreshPlayerIdentity()
     {
         string name  = PlayerPrefs.GetString(PLAYER_NAME_KEY,  "Vault Runner");
-        string title = PlayerPrefs.GetString(PLAYER_TITLE_KEY, "Rookie");
         int    level = PlayerPrefs.GetInt(LEVEL_KEY, 1);
         int    gems  = PlayerPrefs.GetInt(GEM_KEY, 0);
 
+        // Derive title from tier (prefer live tier over stored string)
+        int    trophies  = PlayerPrefs.GetInt(TROPHIES_KEY, 0);
+        int    prestige  = PlayerPrefs.GetInt("VaultDash_PrestigeLevel", 0);
+        var    tier      = RankedProgressionManager.GetTierForTrophies(trophies);
+        string title     = prestige > 0
+            ? $"Prestige {prestige} · {tier.name}"
+            : tier.name;
+
         if (playerNameText  != null) playerNameText.text  = name;
         if (playerLevelText != null) playerLevelText.text = $"Level {level}";
-        if (playerTitleText != null) playerTitleText.text = title;
+        if (playerTitleText != null)
+        {
+            playerTitleText.text  = title;
+            playerTitleText.color = tier.color;
+        }
         if (gemBalanceText  != null) gemBalanceText.text  = $"💎 {gems}";
+
+        // ─── Prestige Badge ───────────────────────────────────────────────────
+        if (prestigeBadge != null)
+        {
+            prestigeBadge.SetPrestige(prestige, trophies);
+        }
+        else
+        {
+            // Fallback standalone fields
+            if (prestigeTierText != null)
+            {
+                string stars = RankedProgressionManager.GetPrestigeStars(prestige);
+                prestigeTierText.text  = prestige > 0
+                    ? $"{stars} {tier.name.ToUpper()}"
+                    : tier.name.ToUpper();
+                prestigeTierText.color = tier.color;
+            }
+            if (prestigeStarsText != null)
+            {
+                prestigeStarsText.text         = RankedProgressionManager.GetPrestigeStars(prestige);
+                prestigeStarsText.gameObject.SetActive(prestige > 0);
+            }
+        }
+
+        // Purple glow ring on avatar
+        if (prestigeGlowRing != null)
+        {
+            if (prestige > 0)
+            {
+                prestigeGlowRing.gameObject.SetActive(true);
+                prestigeGlowRing.color = RankedProgressionManager.GetPrestigeGlowColor(prestige);
+            }
+            else
+            {
+                prestigeGlowRing.gameObject.SetActive(false);
+            }
+        }
     }
 
     // ─── Tab Switching ────────────────────────────────────────────────────────
@@ -163,9 +218,10 @@ public class ProfileScreen : MonoBehaviour
         int matches = PlayerPrefs.GetInt(MATCHES_KEY,    0);
         int score   = PlayerPrefs.GetInt(BEST_SCORE_KEY, 0);
         float dist  = PlayerPrefs.GetFloat(BEST_DIST_KEY, 0f);
-        int trophies= PlayerPrefs.GetInt(TROPHIES_KEY,  0);
-        string rank = PlayerPrefs.GetString(RANK_KEY, "Rookie");
+        int trophies= PlayerPrefs.GetInt(TROPHIES_KEY,   0);
+        int prestige= PlayerPrefs.GetInt("VaultDash_PrestigeLevel", 0);
 
+        var tier = RankedProgressionManager.GetTierForTrophies(trophies);
         float winRate = matches > 0 ? (float)wins / matches * 100f : 0f;
 
         if (totalWinsText    != null) totalWinsText.text    = $"Wins  {wins}";
@@ -173,8 +229,17 @@ public class ProfileScreen : MonoBehaviour
         if (winRateText      != null) winRateText.text      = $"Win Rate  {winRate:F0}%";
         if (bestScoreText    != null) bestScoreText.text    = $"Best Score  {score:N0}";
         if (bestDistanceText != null) bestDistanceText.text = $"Best Run  {dist:F0}m";
-        if (totalTrophiesText!= null) totalTrophiesText.text= $"Trophies 🏆 {trophies}";
-        if (currentRankText  != null) currentRankText.text  = $"Rank  {rank}";
+        if (totalTrophiesText!= null) totalTrophiesText.text= $"Trophies 🏆 {trophies:N0}";
+
+        if (currentRankText  != null)
+        {
+            string stars = RankedProgressionManager.GetPrestigeStars(prestige);
+            string rankDisplay = prestige > 0
+                ? $"{tier.emoji} {tier.name}  {stars}  Prestige {prestige}"
+                : $"{tier.emoji} {tier.name}";
+            currentRankText.text  = rankDisplay;
+            currentRankText.color = tier.color;
+        }
     }
 
     // ─── Mastery ──────────────────────────────────────────────────────────────
