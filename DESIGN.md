@@ -414,36 +414,51 @@ LEGEND RANK ∞ (infinite)
 
 ---
 
-### 3️⃣ "Near Miss" Mechanic (Revenge Queue)
-**What**: Instant rematch system for competitive energy
+### 3️⃣ Revenge Queue (Always Available)
+**What**: Instant rematch option after EVERY game (not just close matches)
 
-**Trigger**: Opponent beats you by < 50 points
+**Trigger**: Game Over → Victory or Defeat screen
 ```
 GAME OVER
-┌─────────────────────────┐
-│ You Lost! (2450 vs 2500)│
-│                         │
-│ [REVENGE MATCH]  [Menu] │
-│ "Beat Jake again?"      │
-└─────────────────────────┘
+┌──────────────────────────────┐
+│ You Lost! (2450 vs 2500)     │
+│                              │
+│ [REMATCH vs Jake]  [Menu]    │
+│ "Play again?"                │
+│                              │
+│ OR                           │
+│                              │
+│ You Won! (3200 vs 2800)      │
+│ [REMATCH vs Jake]  [Menu]    │
+│ "Another round?"             │
+└──────────────────────────────┘
 
-Click REVENGE:
+Click REMATCH:
   → Instant queue (same opponent)
-  → Best-of-3 challenge option
-  → Loser streak tracking
+  → Preserves streak/momentum
+  → Can toggle Best-of-3 mode
 ```
+
+**Design Rationale** (per Bart - 2026-02-21):
+- Available ALWAYS = no confusion about when mechanic exists
+- Consistent UX (players always see same buttons)
+- Encourages rematches (win OR lose, player wants revanche)
+- Builds competitive streaks naturally
 
 **Advanced**: Best-of-3 Mode
 - Win 2/3 games vs same opponent
 - Prize pool for winner (gems/trophies)
 - Bragging rights (leaderboard)
+- Tournament-style feel
 
 **Psychology**:
-- Angry players = most engaged players
+- Angry players = most engaged players (lose → revenge)
+- Winning players = confident (win → next match)
 - Drives 2-3x rematch rate
 - Session duration increase
+- Natural competitive escalation
 
-**Priority**: Week 6+
+**Priority**: Week 4 (integrate with VictoryScreen.cs)
 
 ---
 
