@@ -31,7 +31,7 @@ Supercell Clash Royale aesthetic, NOT chibi, clean white background, 1024x1024
 Cipher, brilliant elite hacker, professional adult proportions, realistic human body,
 wearing purple tech hoodie with circuit board patterns and tech panels,
 cyberpunk aesthetic, intense focused expression, mysterious badass vibe,
-visible cybernetic implants on hands and arm, mature serious face,
+visible cybernetic implants on hands and arm, normal human eyes (NO glowing implants in eyes), mature serious face, EMPTY HANDS NO WEAPON,
 front-facing character design, cel-shaded cartoon style, professional premium game character,
 Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult proportions, clean white background, 1024x1024
 ```
@@ -46,7 +46,7 @@ Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult proportio
 Blaze, elite fire warrior, professional adult proportions, realistic female warrior,
 muscular athletic mature build, red and orange armor with fire-resistant plating,
 wild fire-colored hair, aggressive confident powerful expression, serious adult face,
-holding flaming sword or fire-themed weapon, badass warrior stance,
+EMPTY HANDS NO WEAPON, badass warrior stance,
 front-facing powerful character design, cel-shaded cartoon style, professional premium game character,
 Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult body proportions, clean white background, 1024x1024
 ```
@@ -121,7 +121,7 @@ Supercell Clash Royale aesthetic, NOT chibi, clean white background, 1024x1024
 Pulse, elite electric speedster, professional adult proportions, realistic mature speedster,
 wearing pink and white high-tech acceleration suit with lightning bolt designs,
 cybernetic enhancements visible on limbs and torso, excited determined mature expression,
-holding energy weapon or tech device, dynamic power stance ready to move,
+spiky blue and purple hair with electric streaks, stylish modern haircut, EMPTY HANDS NO WEAPON, dynamic power stance ready to move,
 front-facing dynamic character design, cel-shaded cartoon style, professional premium game character,
 Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult body and face, clean white background, 1024x1024
 ```
@@ -136,7 +136,7 @@ Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult body and 
 Eclipse, elite dark mage, professional adult proportions, realistic mature mage,
 wearing dark purple and black mystical robes with eclipse crescent moon symbol,
 ancient mysterious aesthetic with magical undertones, intense focused mature expression,
-holding staff or magical weapon with moon/eclipse motif, commanding mystical stance,
+EMPTY HANDS NO WEAPON, commanding mystical stance,
 front-facing powerful character design, cel-shaded cartoon style, professional premium game character,
 Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult face, clean white background, 1024x1024
 ```
