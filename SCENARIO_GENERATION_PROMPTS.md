@@ -28,30 +28,30 @@ Supercell Clash Royale aesthetic, NOT chibi, clean white background, 1024x1024
 ## 2. CIPHER
 **Prompt**:
 ```
-Cipher, brilliant elite hacker, professional adult proportions, 
+Cipher, brilliant elite hacker, professional adult proportions, realistic human body,
 wearing purple tech hoodie with circuit board patterns and tech panels,
 cyberpunk aesthetic, intense focused expression, mysterious badass vibe,
-visible cybernetic implants or glowing tech accessories on hands,
+visible cybernetic implants on hands and arm, mature serious face,
 front-facing character design, cel-shaded cartoon style, professional premium game character,
-Supercell Clash Royale aesthetic, NOT chibi, clean white background, 1024x1024
+Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult proportions, clean white background, 1024x1024
 ```
 
-**Key Details**: Purple + neon accents, adult, hacker gear, premium cyberpunk
+**Key Details**: Purple + neon accents, adult, hacker gear, premium cyberpunk, mature face
 
 ---
 
 ## 3. BLAZE
 **Prompt**:
 ```
-Blaze, elite fire warrior, professional adult proportions, female warrior,
-muscular athletic build, red and orange armor with fire-resistant plating,
-wild fire-colored hair, aggressive confident powerful expression,
+Blaze, elite fire warrior, professional adult proportions, realistic female warrior,
+muscular athletic mature build, red and orange armor with fire-resistant plating,
+wild fire-colored hair, aggressive confident powerful expression, serious adult face,
 holding flaming sword or fire-themed weapon, badass warrior stance,
 front-facing powerful character design, cel-shaded cartoon style, professional premium game character,
-Supercell Clash Royale aesthetic, NOT chibi, clean white background, 1024x1024
+Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult body proportions, clean white background, 1024x1024
 ```
 
-**Key Details**: Red/Orange/Yellow, muscular adult, warrior attitude, premium feel
+**Key Details**: Red/Orange/Yellow, muscular adult, warrior attitude, premium feel, mature proportions
 
 ---
 
@@ -118,30 +118,30 @@ Supercell Clash Royale aesthetic, NOT chibi, clean white background, 1024x1024
 ## 8. PULSE
 **Prompt**:
 ```
-Pulse, elite electric speedster, professional adult proportions, dynamic energetic presence,
+Pulse, elite electric speedster, professional adult proportions, realistic mature speedster,
 wearing pink and white high-tech acceleration suit with lightning bolt designs,
-cybernetic enhancements visible on limbs and torso, excited determined expression,
+cybernetic enhancements visible on limbs and torso, excited determined mature expression,
 holding energy weapon or tech device, dynamic power stance ready to move,
 front-facing dynamic character design, cel-shaded cartoon style, professional premium game character,
-Supercell Clash Royale aesthetic, NOT chibi, clean white background, 1024x1024
+Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult body and face, clean white background, 1024x1024
 ```
 
-**Key Details**: Pink/White/Yellow, athletic adult, speedster vibe, premium cyber
+**Key Details**: Pink/White/Yellow, athletic adult, speedster vibe, premium cyber, mature proportions
 
 ---
 
 ## 9. ECLIPSE
 **Prompt**:
 ```
-Eclipse, elite dark mage, professional adult proportions, mysterious powerful presence,
+Eclipse, elite dark mage, professional adult proportions, realistic mature mage,
 wearing dark purple and black mystical robes with eclipse crescent moon symbol,
-ancient mysterious aesthetic with magical undertones, intense focused expression,
+ancient mysterious aesthetic with magical undertones, intense focused mature expression,
 holding staff or magical weapon with moon/eclipse motif, commanding mystical stance,
 front-facing powerful character design, cel-shaded cartoon style, professional premium game character,
-Supercell Clash Royale aesthetic, NOT chibi, clean white background, 1024x1024
+Supercell Clash Royale aesthetic, NOT chibi, NOT cute, realistic adult face, clean white background, 1024x1024
 ```
 
-**Key Details**: Dark Purple/Black/Silver, adult, dark mage, premium mystical
+**Key Details**: Dark Purple/Black/Silver, adult, dark mage, premium mystical, mature features
 
 ---
 
