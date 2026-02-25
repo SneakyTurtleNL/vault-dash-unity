@@ -13,7 +13,7 @@ using UnityEngine.UI;
 /// Icon key → file path mapping:
 ///   Tier icons     → Icons/Tiers/tier_{rookie|silver|gold|diamond|master|legend}
 ///   Currency       → Icons/Currency/{gem|coin|trophy}
-///   Power-ups      → Icons/PowerUps/power_{electric}
+///   Power-ups      → Icons/PowerUps/power_{electric|freeze|shrink|reverse|obstacle}
 ///   Actions        → Icons/Actions/{star|shield|sword}
 ///   UI flat        → Icons/UI/{gem_flat|coin_flat|trophy_flat|crown_flat|star_flat|lightning_flat}
 ///
@@ -55,7 +55,11 @@ public class GameIconSystem : MonoBehaviour
         { "sword",                "Icons/Actions/sword"       },   // attack/rematch
 
         // ── Power-Up Icons ────────────────────────────────────────────────────
-        { "power_electric",       "Icons/PowerUps/power_electric" },  // electric
+        { "power_electric",       "Icons/PowerUps/power_electric"  },  // electric
+        { "power_freeze",         "Icons/PowerUps/power_freeze"    },  // freeze power-up HUD
+        { "power_shrink",         "Icons/PowerUps/power_shrink"    },  // shrink power-up HUD
+        { "power_reverse",        "Icons/PowerUps/power_reverse"   },  // reverse power-up HUD
+        { "power_obstacle",       "Icons/PowerUps/power_obstacle"  },  // obstacle power-up HUD
 
         // ── UI Flat Variants (smaller/HUD use) ────────────────────────────────
         { "gem_flat",             "Icons/UI/gem_flat"         },
@@ -64,6 +68,22 @@ public class GameIconSystem : MonoBehaviour
         { "crown_flat",           "Icons/UI/crown_flat"       },
         { "star_flat",            "Icons/UI/star_flat"        },
         { "lightning_flat",       "Icons/UI/lightning_flat"   },
+
+        // ── Prestige Badges (future batch — stub) ─────────────────────────────
+        // TODO: Add prestige badge icons when Scenario.gg batch is generated
+        // Expected keys: "prestige_1", "prestige_2", "prestige_3", ...
+        // Expected paths: Icons/Prestige/prestige_{n}
+        // Reference: CharacterCardData.prestige field (int, 0-based)
+
+        // ── Battle Pass Icons (future batch — stub) ───────────────────────────
+        // TODO: Add battle pass tier/track icons when Scenario.gg batch is generated
+        // Expected keys: "bp_free", "bp_premium", "bp_elite"
+        // Expected paths: Icons/BattlePass/bp_{free|premium|elite}
+
+        // ── Seasonal Icons (future batch — stub) ──────────────────────────────
+        // TODO: Add seasonal event icons when Scenario.gg batch is generated
+        // Expected keys: "season_spring", "season_summer", "season_fall", "season_winter"
+        // Expected paths: Icons/Seasonal/season_{spring|summer|fall|winter}
     };
 
     // ─── Cache ────────────────────────────────────────────────────────────────
