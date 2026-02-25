@@ -173,7 +173,7 @@ public class IAPManager : MonoBehaviour
         _extensions  = extensions;
         IsInitialized = true;
 
-        Debug.Log("[IAPManager] Store initialized ✅ — products available:");
+        Debug.Log("[IAPManager] Store initialized  — products available:");
         foreach (var pack in gemPacks)
         {
             var product = _controller.products.WithID(pack.productId);

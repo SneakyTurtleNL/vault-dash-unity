@@ -22,7 +22,7 @@ using Firebase.Extensions;
 /// PRESTIGE FLOW:
 ///   When player hits Legend AND has >= 4500 trophies + completes the prestige
 ///   confirmation, trophies reset to 0 (Rookie) but prestigeLevel increments.
-///   Each prestige level grants a badge star: Prestige 1 = ⭐, Prestige 2 = ⭐⭐, etc.
+///   Each prestige level grants a badge star: Prestige 1 = P1, Prestige 2 = P2, etc.
 ///
 /// FIRESTORE SCHEMA (guarded by FIREBASE_FIRESTORE define):
 ///   players/{uid}/
@@ -76,7 +76,8 @@ public class RankedProgressionManager : MonoBehaviour
         public int    minTrophies;
         public int    maxTrophies;   // -1 = no cap (Legend)
         public Color  color;
-        public string emoji;
+        /// <summary>Key for GameIconSystem.GetSprite(iconKey). Replaces legacy emoji field.</summary>
+        public string iconKey;
 
         public bool IsLegend => tier == Tier.Legend;
 
@@ -99,12 +100,12 @@ public class RankedProgressionManager : MonoBehaviour
 
     public static readonly TierInfo[] TIERS = new TierInfo[]
     {
-        new TierInfo { tier = Tier.Rookie,  name = "Rookie",  minTrophies = 0,    maxTrophies = 499,  emoji = "🥉", color = new Color(0.68f, 0.68f, 0.68f) },
-        new TierInfo { tier = Tier.Silver,  name = "Silver",  minTrophies = 500,  maxTrophies = 999,  emoji = "🥈", color = new Color(0.80f, 0.85f, 0.90f) },
-        new TierInfo { tier = Tier.Gold,    name = "Gold",    minTrophies = 1000, maxTrophies = 1999, emoji = "🥇", color = new Color(0.90f, 0.75f, 0.10f) },
-        new TierInfo { tier = Tier.Diamond, name = "Diamond", minTrophies = 2000, maxTrophies = 3499, emoji = "💎", color = new Color(0.40f, 0.70f, 1.00f) },
-        new TierInfo { tier = Tier.Master,  name = "Master",  minTrophies = 3500, maxTrophies = 4499, emoji = "🔮", color = new Color(0.80f, 0.40f, 1.00f) },
-        new TierInfo { tier = Tier.Legend,  name = "Legend",  minTrophies = 4500, maxTrophies = -1,   emoji = "👑", color = new Color(1.00f, 0.84f, 0.00f) },
+        new TierInfo { tier = Tier.Rookie,  name = "Rookie",  minTrophies = 0,    maxTrophies = 499,  iconKey = "tier_rookie",  color = new Color(0.68f, 0.68f, 0.68f) },
+        new TierInfo { tier = Tier.Silver,  name = "Silver",  minTrophies = 500,  maxTrophies = 999,  iconKey = "tier_silver",  color = new Color(0.80f, 0.85f, 0.90f) },
+        new TierInfo { tier = Tier.Gold,    name = "Gold",    minTrophies = 1000, maxTrophies = 1999, iconKey = "tier_gold",    color = new Color(0.90f, 0.75f, 0.10f) },
+        new TierInfo { tier = Tier.Diamond, name = "Diamond", minTrophies = 2000, maxTrophies = 3499, iconKey = "tier_diamond", color = new Color(0.40f, 0.70f, 1.00f) },
+        new TierInfo { tier = Tier.Master,  name = "Master",  minTrophies = 3500, maxTrophies = 4499, iconKey = "tier_master",  color = new Color(0.80f, 0.40f, 1.00f) },
+        new TierInfo { tier = Tier.Legend,  name = "Legend",  minTrophies = 4500, maxTrophies = -1,   iconKey = "tier_legend",  color = new Color(1.00f, 0.84f, 0.00f) },
     };
 
     // Prestige threshold — must be in Legend tier with this many trophies to trigger
@@ -230,7 +231,7 @@ public class RankedProgressionManager : MonoBehaviour
         SaveToLocal();
         StartCoroutine(SavePrestigeRecord(State.prestigeLevel, peakTrophies, totalMatches, totalWins));
 
-        Debug.Log($"[Prestige] ✨ Prestige {State.prestigeLevel} achieved! Trophies reset to 0.");
+        Debug.Log($"[Prestige] Prestige {State.prestigeLevel} achieved! Trophies reset to 0.");
         OnPrestigeCompleted?.Invoke(State.prestigeLevel);
         OnProgressionChanged?.Invoke(State);
     }
@@ -251,6 +252,7 @@ public class RankedProgressionManager : MonoBehaviour
         return TIERS[0];
     }
 
+    /// <summary>Returns prestige star display string using ASCII stars (★) — no emoji.</summary>
     public static string GetPrestigeStars(int prestigeLevel)
     {
         if (prestigeLevel <= 0) return "";
@@ -258,8 +260,8 @@ public class RankedProgressionManager : MonoBehaviour
         int full  = prestigeLevel / 5;
         int rem   = prestigeLevel % 5;
         string s  = "";
-        for (int i = 0; i < full; i++) s += "⭐⭐⭐⭐⭐ ";
-        for (int i = 0; i < rem;  i++) s += "⭐";
+        for (int i = 0; i < full; i++) s += "★★★★★ ";
+        for (int i = 0; i < rem;  i++) s += "★";
         return s.Trim();
     }
 
@@ -292,7 +294,7 @@ public class RankedProgressionManager : MonoBehaviour
             {
                 PlayerPrefs.SetInt(PP_NOTIFIED, 1);
                 PlayerPrefs.Save();
-                Debug.Log($"[Prestige] 🌟 Prestige available! Current prestige: {State.prestigeLevel}");
+                Debug.Log($"[Prestige] Prestige available! Current prestige: {State.prestigeLevel}");
                 OnPrestigeAvailable?.Invoke(State.prestigeLevel);
             }
         }
@@ -432,7 +434,7 @@ public class RankedProgressionManager : MonoBehaviour
         if (task.Exception != null)
             Debug.LogWarning($"[Prestige] Firestore prestige record error: {task.Exception.Message}");
         else
-            Debug.Log($"[Prestige] ✅ Prestige {prestigeLevel} record saved to Firestore.");
+            Debug.Log($"[Prestige] Prestige {prestigeLevel} record saved to Firestore.");
 
         // Also update the parent player doc with latest trophies (reset to 0)
         yield return PushToFirestore();

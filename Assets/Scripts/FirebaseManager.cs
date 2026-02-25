@@ -75,7 +75,7 @@ public class FirebaseManager : MonoBehaviour
             FirebaseAnalytics.SetSessionTimeoutDuration(System.TimeSpan.FromMinutes(30));
 
             IsInitialized = true;
-            Log("[FirebaseManager] Firebase Analytics initialized ✅");
+            Log("[FirebaseManager] Firebase Analytics initialized ");
         }
         else
         {

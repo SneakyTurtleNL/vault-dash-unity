@@ -7,7 +7,7 @@ using TMPro;
 /// UpgradeConfirmModal — "Are you sure?" dialog before spending coins.
 ///
 /// Shows:
-///   "Upgrade to Epic? Cost: 500 🪙"
+///   "Upgrade to Epic? Cost: 500  coins"
 ///   [CONFIRM]  [CANCEL]
 ///
 /// Usage (from CardDetailModal):
@@ -22,14 +22,14 @@ public class UpgradeConfirmModal : MonoBehaviour
     // ─── Inspector ────────────────────────────────────────────────────────────
     [Header("Content")]
     public TMP_Text titleLabel;          // "Upgrade Agent Zero"
-    public TMP_Text bodyLabel;           // "Upgrade to Epic? Cost: 500 🪙"
-    public TMP_Text coinBalanceLabel;    // "Your balance: 1,240 🪙"
+    public TMP_Text bodyLabel;           // "Upgrade to Epic? Cost: 500  coins"
+    public TMP_Text coinBalanceLabel;    // "Your balance: 1,240  coins"
     public Image    cardPreviewImage;    // small card portrait
     public Image    rarityGlowImage;     // shows target rarity color
 
     [Header("Buttons")]
     public Button   confirmButton;
-    public TMP_Text confirmButtonLabel;  // "UPGRADE  500 🪙"
+    public TMP_Text confirmButtonLabel;  // "UPGRADE  500  coins"
     public Button   cancelButton;
 
     [Header("Root")]
@@ -84,17 +84,17 @@ public class UpgradeConfirmModal : MonoBehaviour
 
         // Body
         if (bodyLabel != null)
-            bodyLabel.text = $"Upgrade to <b>{targetRarity}</b>?\nCost: <b>{cost:N0} 🪙</b>";
+            bodyLabel.text = $"Upgrade to <b>{targetRarity}</b>?\nCost: <b>{cost:N0}  coins</b>";
 
         // Balance
         int coins = CardManager.Instance?.GetPlayerCoins()
                     ?? PlayerPrefs.GetInt("VaultDash_Coins", 0);
         if (coinBalanceLabel != null)
-            coinBalanceLabel.text = $"Your balance: {coins:N0} 🪙";
+            coinBalanceLabel.text = $"Your balance: {coins:N0}  coins";
 
         // Confirm button
         if (confirmButtonLabel != null)
-            confirmButtonLabel.text = $"UPGRADE  {cost:N0} 🪙";
+            confirmButtonLabel.text = $"UPGRADE  {cost:N0}  coins";
         if (confirmButton != null)
             confirmButton.interactable = coins >= cost;
 

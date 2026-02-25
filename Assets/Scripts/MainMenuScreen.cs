@@ -55,7 +55,7 @@ public class MainMenuScreen : MonoBehaviour
     public SeasonCountdownWidget seasonCountdownWidget;
     [Tooltip("Fallback text if SeasonCountdownWidget not used")]
     public TMP_Text              seasonCountdownText;   // "Season 1 ends in 3d 4h"
-    public TMP_Text              seasonNameBadgeText;   // "🔥 NEON VAULT"
+    public TMP_Text              seasonNameBadgeText;   // "NEON VAULT"
     public Image                 seasonThemeAccent;     // colored line (theme color)
     public Button                seasonBannerButton;    // tap → ranked screen
 
@@ -162,7 +162,7 @@ public class MainMenuScreen : MonoBehaviour
         }
 
         if (seasonNameBadgeText != null)
-            seasonNameBadgeText.text = $"🏆 {season.name.ToUpper()}";
+            seasonNameBadgeText.text = season.name.ToUpper();
 
         if (seasonThemeAccent != null && season.cosmetic != null)
             seasonThemeAccent.color = season.cosmetic.ThemeColorUnity;
@@ -173,8 +173,9 @@ public class MainMenuScreen : MonoBehaviour
     // ─── Currency ─────────────────────────────────────────────────────────────
     void RefreshCurrency()
     {
-        if (gemCountText  != null) gemCountText.text  = $"💎 {PlayerPrefs.GetInt("VaultDash_Gems", 0)}";
-        if (coinCountText != null) coinCountText.text = $"🪙 {PlayerPrefs.GetInt("VaultDash_Coins", 0)}";
+        // Icons shown via Image components in the currency HUD
+        if (gemCountText  != null) gemCountText.text  = $"{PlayerPrefs.GetInt("VaultDash_Gems", 0)}";
+        if (coinCountText != null) coinCountText.text = $"{PlayerPrefs.GetInt("VaultDash_Coins", 0)}";
     }
 
     // ─── Network Status ───────────────────────────────────────────────────────

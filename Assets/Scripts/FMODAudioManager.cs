@@ -93,7 +93,7 @@ public class FMODAudioManager : MonoBehaviour
         LoadVolumePrefs();
 
 #if FMOD_AVAILABLE
-        Debug.Log("[FMODAudioManager] FMOD Studio active ✓");
+        Debug.Log("[FMODAudioManager] FMOD Studio active");
         InitFMOD();
 #else
         Debug.Log("[FMODAudioManager] FMOD not available — falling back to AudioManager.");
@@ -299,7 +299,7 @@ public class FMODAudioManager : MonoBehaviour
         StopMatchMusic();
         StopMenuMusic();
         FMODUnity.RuntimeManager.PlayOneShot(victoryFanfareEvent);
-        Debug.Log("[FMODAudioManager] Victory fanfare 🎉");
+        Debug.Log("[FMODAudioManager] Victory fanfare ");
 #else
         AudioManager.Instance?.PlayVictory();
 #endif
@@ -311,7 +311,7 @@ public class FMODAudioManager : MonoBehaviour
         StopMatchMusic();
         StopMenuMusic();
         FMODUnity.RuntimeManager.PlayOneShot(defeatStingEvent);
-        Debug.Log("[FMODAudioManager] Defeat sting 😞");
+        Debug.Log("[FMODAudioManager] Defeat sting");
 #else
         AudioManager.Instance?.PlayDefeat();
 #endif

@@ -52,7 +52,7 @@ public class CardDetailModal : MonoBehaviour
 
     [Header("Prestige — Character")]
     public GameObject prestigePanel;
-    public TMP_Text   prestigeLabel;    // "✦✦✦ Prestige 3"
+    public TMP_Text   prestigeLabel;    // "*** Prestige 3"
 
     [Header("Stats — Skill")]
     public GameObject statsSkillPanel;
@@ -73,7 +73,7 @@ public class CardDetailModal : MonoBehaviour
 
     [Header("Upgrade")]
     public Button          upgradeButton;
-    public TMP_Text        upgradeButtonLabel; // "Upgrade to Rare — 500 🪙"
+    public TMP_Text        upgradeButtonLabel; // "Upgrade to Rare — 500  coins"
     public UpgradeConfirmModal upgradeConfirmModal;
 
     [Header("Close")]
@@ -166,7 +166,7 @@ public class CardDetailModal : MonoBehaviour
         // Prestige
         if (prestigePanel != null) prestigePanel.SetActive(data.prestige > 0);
         if (prestigeLabel != null && data.prestige > 0)
-            prestigeLabel.text = new string('✦', data.prestige) + $"  Prestige {data.prestige}";
+            prestigeLabel.text = new string('*', data.prestige) + $"  Prestige {data.prestige}";
 
         // Video (none for characters — hide)
         if (videoPanel != null) videoPanel.SetActive(false);
@@ -180,7 +180,7 @@ public class CardDetailModal : MonoBehaviour
         if (upgradeButtonLabel != null && canUpgrade)
         {
             CardRarity next = (CardRarity)((int)data.rarity + 1);
-            upgradeButtonLabel.text = $"Upgrade to {next}  —  {data.UpgradeCostCoins()} 🪙";
+            upgradeButtonLabel.text = $"Upgrade to {next}  —  {data.UpgradeCostCoins()}  coins";
         }
     }
 
@@ -235,7 +235,7 @@ public class CardDetailModal : MonoBehaviour
         if (upgradeButtonLabel != null && canUpgrade)
         {
             CardRarity next = (CardRarity)((int)data.rarity + 1);
-            upgradeButtonLabel.text = $"Upgrade to {next}  —  {data.UpgradeCostCoins()} 🪙";
+            upgradeButtonLabel.text = $"Upgrade to {next}  —  {data.UpgradeCostCoins()}  coins";
         }
     }
 

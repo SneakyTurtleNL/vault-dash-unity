@@ -39,7 +39,7 @@ public class TopBarUI : MonoBehaviour
     [Header("Opponent Prestige Badge")]
     [Tooltip("PrestigeBadge component on the opponent side of top bar")]
     public PrestigeBadge opponentPrestigeBadge;
-    [Tooltip("Standalone: opponent tier text (e.g. '💎 DIAMOND ⭐⭐')")]
+    [Tooltip("Standalone: opponent tier text (e.g. 'DIAMOND ★★')")]
     public TMP_Text    opponentTierText;
     [Tooltip("Opponent character image — tinted purple if opponent has prestige")]
     public Image       opponentCharacterGlow;
@@ -135,9 +135,10 @@ public class TopBarUI : MonoBehaviour
         {
             var tier  = RankedProgressionManager.GetTierForTrophies(opponentTrophies);
             string stars = RankedProgressionManager.GetPrestigeStars(opponentPrestigeLevel);
+            // Icon is shown via Image (use GameIconSystem.ApplyIcon on a sibling Image component)
             opponentTierText.text  = opponentPrestigeLevel > 0
-                ? $"{tier.emoji} {tier.name} {stars}"
-                : $"{tier.emoji} {tier.name}";
+                ? $"{tier.name} {stars}"
+                : tier.name;
             opponentTierText.color = tier.color;
         }
 

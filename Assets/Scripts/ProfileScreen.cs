@@ -28,7 +28,7 @@ public class ProfileScreen : MonoBehaviour
     [Header("Prestige Badge")]
     [Tooltip("Attach a PrestigeBadge component here — auto-refreshed on activate")]
     public PrestigeBadge prestigeBadge;
-    public TMP_Text  prestigeTierText;    // e.g. "⭐⭐ DIAMOND" (standalone fallback)
+    public TMP_Text  prestigeTierText;    // e.g. "★★ DIAMOND" (standalone fallback)
     public TMP_Text  prestigeStarsText;   // standalone star row
     public Image     prestigeGlowRing;   // paarse ring rond avatar (optional)
 
@@ -79,8 +79,8 @@ public class ProfileScreen : MonoBehaviour
     [Header("Season Info (Stats Panel)")]
     [Tooltip("e.g. 'Season 1 — Neon Vault'")]
     public TMP_Text  currentSeasonText;     // "Season 1 — Neon Vault"
-    public TMP_Text  peakTrophiesText;      // "Peak this season: 2,340 🏆"
-    public TMP_Text  seasonRewardText;      // "Season reward: 23 💎"
+    public TMP_Text  peakTrophiesText;      // "Peak this season: 2,340 trophies"
+    public TMP_Text  seasonRewardText;      // "Season reward: 23 gems"
     public TMP_Text  seasonEndText;         // "Ends in 3d 4h"
     public Image     seasonAccentBar;       // colored by season theme
     public GameObject seasonInfoSection;   // show/hide the whole block
@@ -164,7 +164,8 @@ public class ProfileScreen : MonoBehaviour
             playerTitleText.text  = title;
             playerTitleText.color = tier.color;
         }
-        if (gemBalanceText  != null) gemBalanceText.text  = $"💎 {gems}";
+        // Gem icon shown via Image component next to label
+        if (gemBalanceText  != null) gemBalanceText.text  = $"{gems}";
 
         // ─── Prestige Badge ───────────────────────────────────────────────────
         if (prestigeBadge != null)
@@ -253,14 +254,16 @@ public class ProfileScreen : MonoBehaviour
         if (winRateText      != null) winRateText.text      = $"Win Rate  {winRate:F0}%";
         if (bestScoreText    != null) bestScoreText.text    = $"Best Score  {score:N0}";
         if (bestDistanceText != null) bestDistanceText.text = $"Best Run  {dist:F0}m";
-        if (totalTrophiesText!= null) totalTrophiesText.text= $"Trophies 🏆 {trophies:N0}";
+        // Trophy icon shown via Image component
+        if (totalTrophiesText!= null) totalTrophiesText.text= $"Trophies  {trophies:N0}";
 
         if (currentRankText  != null)
         {
+            // Tier icon shown via Image (use GameIconSystem.ApplyIcon on a sibling Image)
             string stars = RankedProgressionManager.GetPrestigeStars(prestige);
             string rankDisplay = prestige > 0
-                ? $"{tier.emoji} {tier.name}  {stars}  Prestige {prestige}"
-                : $"{tier.emoji} {tier.name}";
+                ? $"{tier.name}  {stars}  Prestige {prestige}"
+                : tier.name;
             currentRankText.text  = rankDisplay;
             currentRankText.color = tier.color;
         }
@@ -286,12 +289,12 @@ public class ProfileScreen : MonoBehaviour
         // Peak trophies this season (from SeasonManager live cache)
         int peakTrophies = SeasonManager.Instance?.PeakTrophiesThisSeason ?? 0;
         if (peakTrophiesText != null)
-            peakTrophiesText.text = $"Peak this season: {peakTrophies:N0} 🏆";
+            peakTrophiesText.text = $"Peak this season: {peakTrophies:N0} trophies";
 
         // Estimated season reward
         int estimatedGems = PlayerSeasonRecord.CalculateGemReward(peakTrophies);
         if (seasonRewardText != null)
-            seasonRewardText.text = $"Est. season reward: {estimatedGems} 💎";
+            seasonRewardText.text = $"Est. season reward: {estimatedGems} gems";
 
         // Time remaining
         if (seasonEndText != null)
@@ -387,7 +390,7 @@ public class ProfileScreen : MonoBehaviour
                 GameObject go = new GameObject($"SkinItem_{i}");
                 go.transform.SetParent(inventoryContainer, false);
                 var text = go.AddComponent<TMP_Text>();
-                text.text = $"✓ {skinNames[i]}";
+                text.text = $"{skinNames[i]}";
                 text.fontSize = 13;
                 text.color = new Color(0.9f, 0.75f, 0.1f);
                 var rt = go.GetComponent<RectTransform>();

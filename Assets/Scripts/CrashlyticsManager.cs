@@ -94,7 +94,7 @@ public class CrashlyticsManager : MonoBehaviour
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
         _isActive = true;
-        Debug.Log("[Crashlytics] ✅ Enabled — tracking errors globally");
+        Debug.Log("[Crashlytics]  Enabled — tracking errors globally");
     }
 
     void OnDestroy()

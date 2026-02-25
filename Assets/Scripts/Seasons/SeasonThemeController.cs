@@ -104,7 +104,7 @@ public class SeasonThemeController : MonoBehaviour
 
     void OnSeasonChanged(SeasonInfo newSeason)
     {
-        Debug.Log($"[SeasonTheme] 🎨 Season theme change: {newSeason?.name}");
+        Debug.Log($"[SeasonTheme] Season theme change: {newSeason?.name}");
 
         if (_transitionRoutine != null) StopCoroutine(_transitionRoutine);
         _transitionRoutine = StartCoroutine(TransitionToSeason(newSeason));
@@ -167,7 +167,7 @@ public class SeasonThemeController : MonoBehaviour
 
         ApplyColors(targetPrimary, targetGlow, targetFog, 1f);
         _appliedSeason = season;
-        Debug.Log($"[SeasonTheme] ✅ Theme applied: {season.name}");
+        Debug.Log($"[SeasonTheme]  Theme applied: {season.name}");
     }
 
     void ApplyThemeImmediate(SeasonInfo season)

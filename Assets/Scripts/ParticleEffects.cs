@@ -316,7 +316,7 @@ public class ParticleEffects : MonoBehaviour
 
         if (tmp != null)
         {
-            tmp.text  = isCombo ? $"+{amount} COMBO! 🔥" : $"+{amount}";
+            tmp.text  = isCombo ? $"+{amount} COMBO!" : $"+{amount}";
             tmp.color = isCombo ? new Color(1f, 0.7f, 0f) : Color.white;
         }
 

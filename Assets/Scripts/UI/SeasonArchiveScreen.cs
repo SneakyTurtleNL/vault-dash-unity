@@ -24,17 +24,17 @@ public class SeasonArchiveScreen : MonoBehaviour
     // ─── Inspector ────────────────────────────────────────────────────────────
     [Header("Header")]
     public TMP_Text  headerText;             // "Season Archive"
-    public TMP_Text  gemBalanceText;         // "💎 340"
+    public TMP_Text  gemBalanceText;         // "340" (gem icon via Image)
 
     [Header("Current Season")]
     public GameObject currentSeasonSection;
     public TMP_Text   currentSeasonLabel;    // "Season 1 — Neon Vault"
     public TMP_Text   currentSkinName;       // "Neon Vault Operative"
     public TMP_Text   currentSkinDesc;       // description
-    public TMP_Text   currentSkinCost;       // "500 💎" or "FREE at Prestige 5"
+    public TMP_Text   currentSkinCost;       // "500 gems" or "FREE at Prestige 5"
     public Image      currentSkinPreview;
     public Button     buyCurrentButton;
-    public TMP_Text   buyCurrentButtonText;  // "Buy 500 💎" / "Earned ✅" / "Owned ✅"
+    public TMP_Text   buyCurrentButtonText;  // "Buy 500 gems" / "Earned" / "Owned"
     public Image      currentSeasonAccent;   // season theme color bar
 
     [Header("Archive Grid")]
@@ -77,7 +77,7 @@ public class SeasonArchiveScreen : MonoBehaviour
     public void OnActivate()
     {
         _playerGems = PlayerPrefs.GetInt("VaultDash_Gems", 0);
-        if (gemBalanceText != null) gemBalanceText.text = $"💎 {_playerGems:N0}";
+        if (gemBalanceText != null) gemBalanceText.text = $"{_playerGems:N0}";
 
         StartCoroutine(LoadSeasons());
     }
@@ -186,14 +186,14 @@ public class SeasonArchiveScreen : MonoBehaviour
 
         if (currentSkinCost != null)
             currentSkinCost.text = owned
-                ? $"Earned at Prestige {prestige} ✅"
-                : $"Buy for {cost} 💎";
+                ? $"Earned at Prestige {prestige}"
+                : $"Buy for {cost} gems";
 
         if (buyCurrentButton != null)
         {
             buyCurrentButton.interactable = !owned;
             if (buyCurrentButtonText != null)
-                buyCurrentButtonText.text = owned ? "Owned ✅" : $"Buy {cost} 💎";
+                buyCurrentButtonText.text = owned ? "Owned" : $"Buy {cost} gems";
         }
 
         // Theme color
@@ -232,7 +232,7 @@ public class SeasonArchiveScreen : MonoBehaviour
         SetChildText(card, "SkinDesc",      cosmetic?.description ?? "");
 
         int archiveCost = cosmetic?.ArchiveCostDerived ?? 750;
-        SetChildText(card, "CostText",      entry.owned ? "Owned ✅" : $"{archiveCost} 💎");
+        SetChildText(card, "CostText",      entry.owned ? "Owned" : $"{archiveCost} gems");
 
         // Buy button
         var btn = card.GetComponentInChildren<Button>();
@@ -285,7 +285,7 @@ public class SeasonArchiveScreen : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.3f);
         _playerGems -= cost;
         PlayerPrefs.SetInt("VaultDash_Gems", _playerGems);
-        if (gemBalanceText != null) gemBalanceText.text = $"💎 {_playerGems:N0}";
+        if (gemBalanceText != null) gemBalanceText.text = $"{_playerGems:N0}";
         Debug.Log($"[SeasonArchive] (stub) Purchased skin {skinId}");
 
         // Reload UI

@@ -206,11 +206,11 @@ public class ParticleShopItem : MonoBehaviour
         if (particlePriceText != null)
         {
             if (isUnlocked)
-                particlePriceText.text = "✓ OWNED";
+                particlePriceText.text = "OWNED";
             else if (cosmetic.gemsPrice == 0)
                 particlePriceText.text = "LOCKED";
             else
-                particlePriceText.text = $"{cosmetic.gemsPrice}💎";
+                particlePriceText.text = $"{cosmetic.gemsPrice} gems";
         }
 
         if (lockedOverlay != null)

@@ -156,8 +156,9 @@ public class ShopScreen : MonoBehaviour
         int gems  = PlayerPrefs.GetInt(GEM_KEY,  0);
         int coins = PlayerPrefs.GetInt(COIN_KEY, 0);
 
-        if (gemBalanceText  != null) gemBalanceText.text  = $"💎 {gems}";
-        if (coinBalanceText != null) coinBalanceText.text = $"🪙 {coins}";
+        // Icons shown via Image components next to these labels (wire in Inspector)
+        if (gemBalanceText  != null) gemBalanceText.text  = $"{gems}";
+        if (coinBalanceText != null) coinBalanceText.text = $"{coins}";
     }
 
     // ─── Gem Packs ────────────────────────────────────────────────────────────
@@ -215,7 +216,7 @@ public class ShopScreen : MonoBehaviour
         int gems = PlayerPrefs.GetInt(GEM_KEY, 0);
         if (gems < skin.gemCost)
         {
-            ShowToast($"Not enough gems! Need 💎{skin.gemCost}");
+            ShowToast($"Not enough gems! Need {skin.gemCost} gems");
             return;
         }
 
@@ -226,7 +227,7 @@ public class ShopScreen : MonoBehaviour
 
         RefreshCurrencyDisplay();
         BuildSkinCards(); // rebuild to show owned state
-        ShowToast($"✅ {skin.displayName} unlocked!");
+        ShowToast($"{skin.displayName} unlocked!");
 
         Debug.Log($"[ShopScreen] Skin purchased: {skin.skinId}");
     }
@@ -259,7 +260,7 @@ public class ShopScreen : MonoBehaviour
     void OnGemsGranted(string productId, int amount)
     {
         RefreshCurrencyDisplay();
-        ShowToast($"💎 +{amount} gems added!");
+        ShowToast($"+{amount} gems added!");
         Debug.Log($"[ShopScreen] Gems granted: {amount} (from {productId})");
     }
 
@@ -324,7 +325,8 @@ public class GemPackUI : MonoBehaviour
     public void Setup(string displayName, int gemAmount, string priceText, bool isBestValue, System.Action onBuy)
     {
         if (nameText      != null) nameText.text      = displayName;
-        if (gemAmountText != null) gemAmountText.text = $"💎 {gemAmount}";
+        // Gem icon shown via Image component next to this label
+        if (gemAmountText != null) gemAmountText.text = $"{gemAmount}";
         if (this.priceText!= null) this.priceText.text = priceText;
         if (bestValueBanner != null) bestValueBanner.SetActive(isBestValue);
 
@@ -359,7 +361,8 @@ public class SkinCard : MonoBehaviour
         if (previewImage      != null && skin.preview != null) previewImage.sprite = skin.preview;
         if (skinNameText      != null) skinNameText.text      = skin.displayName;
         if (characterNameText != null) characterNameText.text = skin.characterName;
-        if (priceText         != null) priceText.text         = owned ? "✓ Owned" : $"💎 {skin.gemCost}";
+        // Gem icon shown via Image component; "Owned" badge shown via ownedBadge GO
+        if (priceText         != null) priceText.text         = owned ? "Owned" : $"{skin.gemCost} gems";
         if (ownedBadge        != null) ownedBadge.SetActive(owned);
 
         if (buyButton != null)

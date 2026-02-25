@@ -151,7 +151,7 @@ public class CardDeckScreen : MonoBehaviour
         int coins = CardManager.Instance != null
             ? CardManager.Instance.GetPlayerCoins()
             : PlayerPrefs.GetInt("VaultDash_Coins", 0);
-        coinBalanceText.text = $"🪙 {coins:N0}";
+        coinBalanceText.text = $" coins {coins:N0}";
     }
 
     // ─── Navigation ───────────────────────────────────────────────────────────

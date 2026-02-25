@@ -20,7 +20,7 @@ using System;
 ///   ProgressBar    Slider — X / Y copies to upgrade
 ///   ProgressLabel  TMP    — "3 / 5 copies"
 ///   UpgradeButton  Button — visible only when upgrade is available
-///   UpgradeCost    TMP    — "500 🪙" on upgrade button
+///   UpgradeCost    TMP    — "500  coins" on upgrade button
 ///   SelectedBorder Image  — highlighted when card is in active deck
 ///
 /// Usage:
@@ -204,7 +204,7 @@ public class CardUI : MonoBehaviour
         if (upgradeCostLabel != null && canUpgrade)
         {
             CardRarity next = (CardRarity)((int)data.rarity + 1);
-            upgradeCostLabel.text = $"{data.UpgradeCostCoins()} 🪙 → {next}";
+            upgradeCostLabel.text = $"{data.UpgradeCostCoins()}  coins → {next}";
         }
     }
 
@@ -215,7 +215,7 @@ public class CardUI : MonoBehaviour
         if (upgradeCostLabel != null && canUpgrade)
         {
             CardRarity next = (CardRarity)((int)data.rarity + 1);
-            upgradeCostLabel.text = $"{data.UpgradeCostCoins()} 🪙 → {next}";
+            upgradeCostLabel.text = $"{data.UpgradeCostCoins()}  coins → {next}";
         }
     }
 

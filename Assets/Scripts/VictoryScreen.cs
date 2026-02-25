@@ -44,7 +44,7 @@ public class VictoryScreen : MonoBehaviour
 
     [Header("Stats Panel")]
     public TMP_Text finalScoreText;
-    public TMP_Text trophiesText;       // "+15 🏆" or "-8 🏆"
+    public TMP_Text trophiesText;       // "+15" or "-8" (trophy icon shown via Image)
     public TMP_Text rankText;           // "Rookie → Silver" or "Still Rookie"
     public TMP_Text distanceText;       // "500m cleared!"
     public TMP_Text rewardText;         // "Reward: 250 coins"
@@ -67,7 +67,7 @@ public class VictoryScreen : MonoBehaviour
 
     // ─── Revenge Queue ────────────────────────────────────────────────────────
     [Header("Revenge Queue")]
-    public TMP_Text  rematchButtonText;     // "REMATCH ⚔️" or "REVENGE ⚔️"
+    public TMP_Text  rematchButtonText;     // "REMATCH" or "REVENGE"
     public TMP_Text  streakText;            // "You lead 2-1 this session!"
     public TMP_Text  opponentStatusText;    // "Opponent available" / "Searching…"
     public Toggle    bestOf3Toggle;         // Toggle best-of-3 mode
@@ -217,7 +217,7 @@ public class VictoryScreen : MonoBehaviour
         if (resultSubText != null)
         {
             resultSubText.text = playerWon
-                ? "You outran your opponent! 🏅"
+                ? "You outran your opponent!"
                 : "Your opponent was faster this time...";
         }
     }
@@ -295,7 +295,8 @@ public class VictoryScreen : MonoBehaviour
         // ─── Trophies text ────────────────────────────────────────────────────
         if (trophiesText != null)
         {
-            trophiesText.text  = trophyChange >= 0 ? $"+{trophyChange} 🏆" : $"{trophyChange} 🏆";
+            // Trophy icon shown via Image component next to this label
+            trophiesText.text  = trophyChange >= 0 ? $"+{trophyChange}" : $"{trophyChange}";
             trophiesText.color = trophyChange >= 0
                 ? new Color(0.9f, 0.75f, 0.1f)
                 : new Color(0.7f, 0.3f, 0.3f);
@@ -313,17 +314,18 @@ public class VictoryScreen : MonoBehaviour
 
             if (oldTier.tier != newTier.tier && trophyChange > 0)
             {
-                rankText.text  = $"🎉 Promoted to {newTier.emoji} {newTier.name}!";
+                // Tier icon shown via Image (use GameIconSystem.ApplyIcon on a sibling Image)
+                rankText.text  = $"Promoted to {newTier.name}!";
                 rankText.color = newTier.color;
             }
             else if (oldTier.tier != newTier.tier && trophyChange < 0)
             {
-                rankText.text  = $"⬇️ Dropped to {newTier.emoji} {newTier.name}";
+                rankText.text  = $"Dropped to {newTier.name}";
                 rankText.color = new Color(0.7f, 0.3f, 0.3f);
             }
             else
             {
-                rankText.text  = playerWon ? "Keep climbing! 🚀" : "Better luck next time!";
+                rankText.text  = playerWon ? "Keep climbing!" : "Better luck next time!";
                 rankText.color = Color.white;
             }
         }
@@ -332,7 +334,8 @@ public class VictoryScreen : MonoBehaviour
         if (rewardText != null)
         {
             int coins = playerWon ? 250 + (score / 10) : 50;
-            rewardText.text = $"Reward: {coins} coins 🪙";
+            // Coin icon shown via Image component next to this label
+            rewardText.text = $"Reward: {coins} coins";
             GrantCoins(coins);
         }
 
@@ -372,7 +375,7 @@ public class VictoryScreen : MonoBehaviour
         // Rematch button label
         if (rematchButtonText != null)
         {
-            rematchButtonText.text = playerWon ? "REMATCH ⚔️" : "REVENGE ⚔️";
+            rematchButtonText.text = playerWon ? "REMATCH" : "REVENGE";
         }
 
         // Session streak display
@@ -404,8 +407,8 @@ public class VictoryScreen : MonoBehaviour
         {
             bool available = MatchmakingService.IsPlayerAvailable(_opponentId);
             opponentStatusText.text = available
-                ? $"✅ {MatchManager.Instance?.OpponentName ?? "Opponent"} is ready"
-                : "🔍 Searching for opponent…";
+                ? $"{MatchManager.Instance?.OpponentName ?? "Opponent"} is ready"
+                : "Searching for opponent...";
         }
 
         // Best-of-3 toggle
@@ -430,7 +433,7 @@ public class VictoryScreen : MonoBehaviour
         if (enabled && bestOf3PrizeText != null)
         {
             int basePrize = 750;
-            bestOf3PrizeText.text = $"Best-of-3 Prize: {basePrize} coins 🪙 + bonus gems 💎";
+            bestOf3PrizeText.text = $"Best-of-3 Prize: {basePrize} coins + bonus gems";
         }
 
         if (enabled && bestOf3ScoreText != null)
@@ -496,7 +499,7 @@ public class VictoryScreen : MonoBehaviour
         if (prestigePromptText != null)
         {
             prestigePromptText.text =
-                $"🌟 PRESTIGE AVAILABLE!\n\n" +
+                $"PRESTIGE AVAILABLE!\n\n" +
                 $"You've conquered Legend.\n" +
                 $"Reset to Rookie and earn Prestige {nextPrestige}.\n\n" +
                 $"{RankedProgressionManager.GetPrestigeStars(nextPrestige)} ({nextPrestige} star{(nextPrestige > 1 ? "s" : "")})\n" +

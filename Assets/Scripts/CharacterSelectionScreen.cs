@@ -222,7 +222,7 @@ public class CharacterSelectionScreen : MonoBehaviour
         }
 
         if (playButtonText != null)
-            playButtonText.text = locked ? "LOCKED 🔒" : "PLAY ▶";
+            playButtonText.text = locked ? "LOCKED" : "PLAY ▶";
     }
 
     // ─── Lock Logic ───────────────────────────────────────────────────────────

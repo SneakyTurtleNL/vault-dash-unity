@@ -13,7 +13,7 @@ using TMPro;
 ///  • Minimum / maximum tracking with reset
 ///  • Shows ms/frame alongside FPS
 ///  • Zero GC: uses a char[] buffer instead of string allocation per frame
-///  • 60 FPS target badge (✔ / ✗)
+///  • 60 FPS target badge (OK / MISS)
 ///
 /// SETUP:
 ///  1. Create a Canvas with a TextMeshProUGUI element anchored top-left.
@@ -140,9 +140,9 @@ public class FrameRateDisplay : MonoBehaviour
         fpsText.color = textColor;
 
         // Badge
-        string badge = fps >= targetFPS ? "✔" : "✗";
+        string badge = fps >= targetFPS ? "OK" : "!!";
 
-        // Format: "60 FPS  16.7ms  ✔"
+        // Format: "60 FPS  16.7ms  OK"
         fpsText.text = $"{fps:F0} FPS  {ms:F1}ms  {badge}\n" +
                        $"<size=60%>min {_minFPS:F0}  max {_maxFPS:F0}  target {targetFPS}</size>";
     }

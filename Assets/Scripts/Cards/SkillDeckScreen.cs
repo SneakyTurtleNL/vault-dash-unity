@@ -279,7 +279,7 @@ public class SkillDeckScreen : MonoBehaviour
         if (coinBalanceText == null) return;
         int coins = CardManager.Instance?.GetPlayerCoins()
                     ?? PlayerPrefs.GetInt("VaultDash_Coins", 0);
-        coinBalanceText.text = $"🪙 {coins:N0}";
+        coinBalanceText.text = $" coins {coins:N0}";
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────

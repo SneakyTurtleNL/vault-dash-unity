@@ -31,18 +31,18 @@ public class SeasonRewardModal : MonoBehaviour
     public CanvasGroup  canvasGroup;         // for fade in/out
 
     [Header("Header")]
-    public TMP_Text  seasonEndedText;        // "🏁 Season 1 Ended!"
+    public TMP_Text  seasonEndedText;        // "Season 1 Ended!"
     public TMP_Text  seasonNameText;         // "Neon Vault"
     public Image     seasonThemeBg;          // tinted by season theme color
 
     [Header("Tier Result")]
-    public TMP_Text  tierEmojiText;          // "👑"
+    public TMP_Text  tierEmojiText;          // Tier name (icon shown via Image component)
     public TMP_Text  tierNameText;           // "LEGEND"
-    public TMP_Text  peakTrophiesText;       // "Peak: 4,820 🏆"
+    public TMP_Text  peakTrophiesText;       // "Peak: 4,820 trophies"
     public Image     tierColorBar;           // colored bar matching tier
 
     [Header("Gem Reward")]
-    public TMP_Text  gemAmountText;          // "💎 150 gems"
+    public TMP_Text  gemAmountText;          // "150 gems" (gem icon via Image)
     public TMP_Text  gemFormulaText;         // "4820 ÷ 100 + Legend bonus"
     public GameObject gemBonusRow;           // hide if no bonus
     public TMP_Text  gemBonusText;           // "+50 Legend bonus"
@@ -60,7 +60,7 @@ public class SeasonRewardModal : MonoBehaviour
 
     [Header("Claim FX")]
     public GameObject claimFXObject;         // particle / shine effect
-    public TMP_Text  alreadyClaimedText;     // "Already claimed ✓"
+    public TMP_Text  alreadyClaimedText;     // "Already claimed"
 
     // ─── State ────────────────────────────────────────────────────────────────
     private SeasonInfo         _season;
@@ -150,7 +150,7 @@ public class SeasonRewardModal : MonoBehaviour
 
         // ── Header ────────────────────────────────────────────────────────────
         if (seasonEndedText != null)
-            seasonEndedText.text = $"🏁 Season {_season.seasonNumber} Ended!";
+            seasonEndedText.text = $"Season {_season.seasonNumber} Ended!";
         if (seasonNameText != null)
             seasonNameText.text = _season.name;
 
@@ -160,21 +160,23 @@ public class SeasonRewardModal : MonoBehaviour
 
         // ── Tier result ───────────────────────────────────────────────────────
         var tier = RankedProgressionManager.GetTierForTrophies(_record.peakTrophies);
-        if (tierEmojiText  != null) tierEmojiText.text  = tier.emoji;
+        // Tier icon shown via Image (use GameIconSystem.ApplyIcon on a sibling Image)
+        if (tierEmojiText  != null) tierEmojiText.text  = tier.name;
         if (tierNameText   != null)
         {
             tierNameText.text  = tier.name.ToUpper();
             tierNameText.color = tier.color;
         }
         if (peakTrophiesText != null)
-            peakTrophiesText.text = $"Peak: {_record.peakTrophies:N0} 🏆";
+            peakTrophiesText.text = $"Peak: {_record.peakTrophies:N0} trophies";
         if (tierColorBar != null) tierColorBar.color = tier.color;
 
         // ── Gem reward ────────────────────────────────────────────────────────
         int gems  = _record.gemReward;
         int bonus = GetTierBonus(_record.peakTrophies);
 
-        if (gemAmountText  != null) gemAmountText.text  = $"💎 {gems} gems";
+        // Gem icon shown via Image component
+        if (gemAmountText  != null) gemAmountText.text  = $"{gems} gems";
         if (gemFormulaText != null)
             gemFormulaText.text = $"{_record.peakTrophies} ÷ 100 = {gems - bonus}";
 
@@ -193,7 +195,7 @@ public class SeasonRewardModal : MonoBehaviour
             if (cosmeticNameText != null)
                 cosmeticNameText.text = _season.cosmetic.skinName;
             if (cosmeticDescText != null)
-                cosmeticDescText.text = $"Earned free — Prestige {_season.cosmetic.prestigeFree} ✅";
+                cosmeticDescText.text = $"Earned free — Prestige {_season.cosmetic.prestigeFree}";
         }
 
         // ── Claim button ──────────────────────────────────────────────────────
@@ -202,7 +204,7 @@ public class SeasonRewardModal : MonoBehaviour
         if (closeButton  != null) closeButton.gameObject.SetActive(_claimed);
 
         if (claimButtonText != null)
-            claimButtonText.text = $"Claim {gems} 💎";
+            claimButtonText.text = $"Claim {gems} gems";
     }
 
     // ─── Claim ────────────────────────────────────────────────────────────────
@@ -240,11 +242,11 @@ public class SeasonRewardModal : MonoBehaviour
         if (alreadyClaimedText != null)
         {
             alreadyClaimedText.gameObject.SetActive(true);
-            alreadyClaimedText.text = $"✅ {awarded} gems claimed!";
+            alreadyClaimedText.text = $"{awarded} gems claimed!";
         }
         if (closeButton != null) closeButton.gameObject.SetActive(true);
 
-        Debug.Log($"[SeasonRewardModal] ✅ Claimed {awarded} gems for {_season.seasonId}");
+        Debug.Log($"[SeasonRewardModal] Claimed {awarded} gems for {_season.seasonId}");
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────

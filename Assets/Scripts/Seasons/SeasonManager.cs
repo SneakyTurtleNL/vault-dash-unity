@@ -179,7 +179,7 @@ public class SeasonManager : MonoBehaviour
             CurrentSeason = season ?? CreateStubSeason();
             IsInitialized = true;
             OnSeasonChanged?.Invoke(CurrentSeason);
-            Debug.Log($"[SeasonManager] ✅ Active season: {CurrentSeason}");
+            Debug.Log($"[SeasonManager]  Active season: {CurrentSeason}");
         }));
 
         // Also load player's peak trophies for this season
@@ -243,7 +243,7 @@ public class SeasonManager : MonoBehaviour
             string prevId = CurrentSeason?.seasonId;
             if (newSeasonId != prevId)
             {
-                Debug.Log($"[SeasonManager] 🔄 Season change detected: {prevId} → {newSeasonId}");
+                Debug.Log($"[SeasonManager] Season change detected: {prevId} → {newSeasonId}");
                 StartCoroutine(HandleSeasonChange(prevId, newSeasonId));
             }
         });
@@ -256,7 +256,7 @@ public class SeasonManager : MonoBehaviour
         // If there was a previous season, fire end logic
         if (!string.IsNullOrEmpty(oldSeasonId) && CurrentSeason != null)
         {
-            Debug.Log($"[SeasonManager] 🏁 Season ended: {oldSeasonId}");
+            Debug.Log($"[SeasonManager] Season ended: {oldSeasonId}");
             yield return StartCoroutine(OnSeasonEnded(CurrentSeason));
         }
 
@@ -268,7 +268,7 @@ public class SeasonManager : MonoBehaviour
             PlayerPrefs.SetInt(PP_ENDING_SOON_FIRED, 0);
             SaveLocalCache();
             OnSeasonChanged?.Invoke(CurrentSeason);
-            Debug.Log($"[SeasonManager] ✅ New season live: {CurrentSeason}");
+            Debug.Log($"[SeasonManager]  New season live: {CurrentSeason}");
         }));
 
         yield return StartCoroutine(LoadPlayerSeasonPeak(newSeasonId));
@@ -295,7 +295,7 @@ public class SeasonManager : MonoBehaviour
 
         // Calculate gem reward
         int gemsEarned = PlayerSeasonRecord.CalculateGemReward(peakTrophies);
-        Debug.Log($"[SeasonManager] 💎 Season reward: {gemsEarned} gems (peak: {peakTrophies} trophies)");
+        Debug.Log($"[SeasonManager]  gems Season reward: {gemsEarned} gems (peak: {peakTrophies} trophies)");
 
         // Write season record to Firestore (players/{uid}/seasons/{seasonId})
         yield return StartCoroutine(WritePlayerSeasonRecord(uid, endedSeason.seasonId,
@@ -349,7 +349,7 @@ public class SeasonManager : MonoBehaviour
         if (transaction.Exception != null)
             Debug.LogWarning($"[SeasonManager] WritePlayerSeasonRecord error: {transaction.Exception.Message}");
         else
-            Debug.Log($"[SeasonManager] ✅ Player season record saved: {seasonId}");
+            Debug.Log($"[SeasonManager]  Player season record saved: {seasonId}");
 #else
         yield return null;
 #endif
@@ -419,7 +419,7 @@ public class SeasonManager : MonoBehaviour
         }
         else
         {
-            Debug.Log($"[SeasonManager] ✅ Claimed {awarded} gems for season {seasonId}");
+            Debug.Log($"[SeasonManager]  Claimed {awarded} gems for season {seasonId}");
         }
 #else
         Debug.Log($"[SeasonManager] (stub) ClaimSeasonReward: {seasonId}");
@@ -637,7 +637,7 @@ public class SeasonManager : MonoBehaviour
             // Season actually ended but listener hasn't fired yet?
             if (DateTime.UtcNow >= CurrentSeason.endDate && CurrentSeason.IsActive == false)
             {
-                Debug.Log("[SeasonManager] ⚡ Season expired — refreshing from Firestore.");
+                Debug.Log("[SeasonManager] Season expired — refreshing from Firestore.");
 #if FIREBASE_FIRESTORE
                 yield return StartCoroutine(LoadCurrentSeasonFromFirestore());
 #endif

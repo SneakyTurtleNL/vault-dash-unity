@@ -35,7 +35,7 @@ namespace VaultDash.Assets
                     directory: "Assets/Resources/Characters"
                 );
             }
-            Debug.Log("✓ Generated 10 fallback character sprites");
+            Debug.Log("Generated 10 fallback character sprites");
         }
 
         public static void GenerateIconSprites()
@@ -70,7 +70,7 @@ namespace VaultDash.Assets
                     directory: "Assets/Resources/Icons"
                 );
             }
-            Debug.Log("✓ Generated 16 fallback icon sprites");
+            Debug.Log("Generated 16 fallback icon sprites");
         }
 
         public static void GenerateBackgroundSprites()
@@ -95,7 +95,7 @@ namespace VaultDash.Assets
                     height: 512
                 );
             }
-            Debug.Log("✓ Generated 5 fallback arena backgrounds");
+            Debug.Log("Generated 5 fallback arena backgrounds");
         }
 
         private static void CreatePlaceholderSprite(string name, Color color, int size = 512, string directory = "Assets/Resources/Characters")

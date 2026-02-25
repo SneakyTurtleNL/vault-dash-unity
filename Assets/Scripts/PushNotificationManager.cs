@@ -108,7 +108,7 @@ public class PushNotificationManager : MonoBehaviour
         FirebaseMessaging.TokenReceived   += OnTokenRefresh;
 
         IsInitialized = true;
-        Log("[FCM] ✅ Ready — listening for push notifications");
+        Log("[FCM]  Ready — listening for push notifications");
 
 #else
         Log("[FCM] Firebase Messaging SDK not installed — running in stub mode.");
@@ -141,7 +141,7 @@ public class PushNotificationManager : MonoBehaviour
         }
         else
         {
-            Log("[FCM] Token stored in Firestore ✅");
+            Log("[FCM] Token stored in Firestore ");
         }
 #else
         Log("[FCM] Firestore SDK not available — token not persisted");

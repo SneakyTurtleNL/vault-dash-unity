@@ -6,7 +6,7 @@ using TMPro;
 /// PrestigeBadge — Reusable UI component that displays:
 ///   • Tier name + color (e.g. "DIAMOND" in blue)
 ///   • Prestige level number (e.g. "Prestige 3")
-///   • Star row (⭐ per prestige level, up to MaxStarsShown before grouping)
+///   • Star row (★ per prestige level, up to MaxStarsShown before grouping)
 ///   • Optional: purple glow on a target Image (for in-game character tint)
 ///
 /// Usage:
@@ -31,14 +31,14 @@ public class PrestigeBadge : MonoBehaviour
     [Tooltip("Background image tinted with tier color")]
     public Image    tierBadgeBackground;
 
-    [Tooltip("Trophy count text, e.g. '🏆 1,240'")]
+    [Tooltip("Trophy count text, e.g. '1,240' (trophy icon via Image)")]
     public TMP_Text trophyCountText;
 
     [Header("Prestige Display")]
     [Tooltip("Shows 'Prestige N' — hidden if prestige == 0")]
     public TMP_Text prestigeLevelText;
 
-    [Tooltip("Shows ⭐ stars — hidden if prestige == 0")]
+    [Tooltip("Shows stars (★) — hidden if prestige == 0")]
     public TMP_Text prestigeStarsText;
 
     [Tooltip("Root GameObject to hide entirely when prestige == 0")]
@@ -115,9 +115,9 @@ public class PrestigeBadge : MonoBehaviour
         if (tierBadgeBackground != null)
             tierBadgeBackground.color = new Color(tier.color.r, tier.color.g, tier.color.b, 0.25f);
 
-        // Trophy count
+        // Trophy count (icon shown via Image component)
         if (trophyCountText != null)
-            trophyCountText.text = $"🏆 {_trophies:N0}";
+            trophyCountText.text = $"{_trophies:N0}";
 
         // Prestige block
         bool hasPrestige = _prestige > 0;
@@ -148,6 +148,7 @@ public class PrestigeBadge : MonoBehaviour
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
+    /// <summary>Returns star string using ASCII ★ — no emoji.</summary>
     static string BuildStarString(int prestigeLevel)
     {
         if (prestigeLevel <= 0) return "";
@@ -156,13 +157,13 @@ public class PrestigeBadge : MonoBehaviour
         if (prestigeLevel <= 10)
         {
             string s = "";
-            for (int i = 0; i < prestigeLevel; i++) s += "⭐";
+            for (int i = 0; i < prestigeLevel; i++) s += "★";
             return s;
         }
         else
         {
-            // e.g. "⭐×23"
-            return $"⭐×{prestigeLevel}";
+            // e.g. "★×23"
+            return $"★×{prestigeLevel}";
         }
     }
 
@@ -203,7 +204,7 @@ public class TierProgressionBar : MonoBehaviour
     public TMP_Text fromTierText;     // "GOLD"
     public TMP_Text toTierText;       // "DIAMOND" (or "MAX" at Legend)
     public TMP_Text progressLabel;    // "240 / 500 to Diamond"
-    public TMP_Text trophyChangeText; // "+15 🏆" or "-8 🏆"
+    public TMP_Text trophyChangeText; // "+15" or "-8" (trophy icon via Image)
     public Image    fillImage;        // Slider fill — tinted tier color
 
     [Header("Animation")]
@@ -248,7 +249,8 @@ public class TierProgressionBar : MonoBehaviour
         // Trophy change label
         if (trophyChangeText != null)
         {
-            trophyChangeText.text  = delta >= 0 ? $"+{delta} 🏆" : $"{delta} 🏆";
+            // Trophy icon shown via Image component next to label
+            trophyChangeText.text  = delta >= 0 ? $"+{delta}" : $"{delta}";
             trophyChangeText.color = delta >= 0
                 ? new Color(0.9f, 0.75f, 0.1f)
                 : new Color(0.8f, 0.3f, 0.3f);
@@ -258,7 +260,7 @@ public class TierProgressionBar : MonoBehaviour
         if (progressLabel != null)
         {
             if (newTier.IsLegend)
-                progressLabel.text = "👑 LEGEND MAX";
+                progressLabel.text = "LEGEND MAX";
             else
             {
                 int nextMin     = newTier.maxTrophies + 1;

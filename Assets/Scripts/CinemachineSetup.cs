@@ -4,7 +4,7 @@ using Cinemachine;
 /// <summary>
 /// CinemachineSetup — Manages the Cinemachine Virtual Camera for Vault Dash.
 ///
-/// Cinemachine package: com.unity.cinemachine 2.9.7 (in manifest.json ✅)
+/// Cinemachine package: com.unity.cinemachine 2.9.7 (in manifest.json)
 ///
 /// FEATURES:
 ///  • Isometric 45° follow camera (replaces raw Camera.main positioning)
