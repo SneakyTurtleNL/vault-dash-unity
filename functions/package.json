@@ -1,0 +1,17 @@
+{
+  "name": "vault-dash-functions",
+  "version": "1.0.0",
+  "description": "Vault Dash Firebase Cloud Functions",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "firebase deploy --only functions",
+    "shell": "firebase functions:shell"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.11.0",
+    "firebase-functions": "^4.5.0"
+  },
+  "engines": {
+    "node": "18"
+  }
+}
