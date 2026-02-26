@@ -219,6 +219,65 @@ public class FirebaseManager : MonoBehaviour
         Log($"[Firebase] Event: purchase  item={itemId} price={price} {currency}");
     }
 
+    // ─── User Identity (added for Week-5 systems) ─────────────────────────────
+
+    /// <summary>UID of the authenticated Firebase user. Empty if not signed in.</summary>
+    public string UserId      { get; private set; } = string.Empty;
+
+    /// <summary>Display name of the authenticated Firebase user.</summary>
+    public string DisplayName { get; private set; } = "Player";
+
+#if FIREBASE_AUTH
+    private Firebase.Auth.FirebaseAuth _auth;
+
+    private void InitAuth()
+    {
+        _auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+        if (_auth.CurrentUser != null)
+        {
+            UserId      = _auth.CurrentUser.UserId;
+            DisplayName = _auth.CurrentUser.DisplayName ?? "Player";
+        }
+        _auth.StateChanged += (_, __) =>
+        {
+            UserId      = _auth.CurrentUser?.UserId      ?? string.Empty;
+            DisplayName = _auth.CurrentUser?.DisplayName ?? "Player";
+        };
+    }
+#endif
+
+    // ─── Economy Helpers (stubs — delegate to your economy service) ───────────
+
+    /// <summary>Grants gems to the local player and logs the transaction.</summary>
+    public void GrantGems(int amount, string source)
+    {
+        // TODO: integrate with your PlayerProfile / Firestore gem balance
+        PlayerPrefs.SetInt("VaultDash_Gems",
+            PlayerPrefs.GetInt("VaultDash_Gems", 0) + amount);
+        PlayerPrefs.Save();
+        Log($"[FirebaseManager] +{amount} gems from '{source}'");
+        LogLootCollected("gem", amount);
+    }
+
+    /// <summary>Grants XP to the local player.</summary>
+    public void GrantXP(int amount, string source)
+    {
+        PlayerPrefs.SetInt("VaultDash_XP",
+            PlayerPrefs.GetInt("VaultDash_XP", 0) + amount);
+        PlayerPrefs.Save();
+        Log($"[FirebaseManager] +{amount} XP from '{source}'");
+    }
+
+    /// <summary>Grants coins to the local player.</summary>
+    public void GrantCoins(int amount, string source)
+    {
+        PlayerPrefs.SetInt("VaultDash_Coins",
+            PlayerPrefs.GetInt("VaultDash_Coins", 0) + amount);
+        PlayerPrefs.Save();
+        Log($"[FirebaseManager] +{amount} coins from '{source}'");
+        LogLootCollected("coin", amount);
+    }
+
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
     void Log(string msg)

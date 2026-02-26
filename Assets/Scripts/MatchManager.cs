@@ -495,6 +495,18 @@ public class MatchManager : MonoBehaviour
         Status = MatchStatus.Idle;
     }
 
+    // ─── Accessors (used by LatencyValidator) ─────────────────────────────────
+
+#if NAKAMA_AVAILABLE
+    /// <summary>Returns the active Nakama IClient (null if not initialised).</summary>
+    public Nakama.IClient  GetClient()  => _client;
+    /// <summary>Returns the active Nakama ISession (null if not authenticated).</summary>
+    public Nakama.ISession GetSession() => _session;
+#else
+    public object GetClient()  => null;
+    public object GetSession() => null;
+#endif
+
     // ─── Helpers ──────────────────────────────────────────────────────────────
     static string ExtractJsonFloat(string json, string key)
     {
