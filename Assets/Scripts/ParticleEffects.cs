@@ -33,6 +33,18 @@ public class ParticleEffects : MonoBehaviour
     public GameObject powerUpGlowPrefab;
     public GameObject swooshPrefab;
 
+    // ─── Loot Burst Large Icons ───────────────────────────────────────────────
+    // Loaded from Resources/Particles/LootBurst/ via GameIconSystem.
+    // Placeholder PNGs in place (128x128 gold/purple/brown). Swap post-launch.
+    // These are assigned to ParticleSystem.textureSheetAnimation when prefabs are missing.
+    [Header("Loot Burst Textures (auto-loaded from Resources)")]
+    [Tooltip("Auto-loaded: Particles/LootBurst/coin_burst_large — override only if needed.")]
+    public Texture2D coinBurstTexture;
+    [Tooltip("Auto-loaded: Particles/LootBurst/gem_burst_large — override only if needed.")]
+    public Texture2D gemBurstTexture;
+    [Tooltip("Auto-loaded: Particles/LootBurst/chest_burst — override only if needed.")]
+    public Texture2D chestBurstTexture;
+
     [Header("Score Popup")]
     public GameObject scorePopupPrefab;  // TextMeshPro popup
     public Canvas     worldCanvas;       // World-space canvas for score popups
@@ -53,6 +65,24 @@ public class ParticleEffects : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         PrewarmPool();
+        LoadLootBurstTextures();
+    }
+
+    /// <summary>
+    /// Loads loot burst textures from Resources if not already assigned in Inspector.
+    /// Paths: Particles/LootBurst/{coin_burst_large|gem_burst_large|chest_burst}
+    /// Placeholder PNGs (128x128 solid color) are in place — swap post-launch.
+    /// </summary>
+    void LoadLootBurstTextures()
+    {
+        if (coinBurstTexture  == null) coinBurstTexture  = Resources.Load<Texture2D>("Particles/LootBurst/coin_burst_large");
+        if (gemBurstTexture   == null) gemBurstTexture   = Resources.Load<Texture2D>("Particles/LootBurst/gem_burst_large");
+        if (chestBurstTexture == null) chestBurstTexture = Resources.Load<Texture2D>("Particles/LootBurst/chest_burst");
+
+        // Log warnings if textures are missing (shouldn't happen post-import)
+        if (coinBurstTexture  == null) Debug.LogWarning("[ParticleEffects] coin_burst_large texture not found.");
+        if (gemBurstTexture   == null) Debug.LogWarning("[ParticleEffects] gem_burst_large texture not found.");
+        if (chestBurstTexture == null) Debug.LogWarning("[ParticleEffects] chest_burst texture not found.");
     }
 
     void PrewarmPool()

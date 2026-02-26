@@ -37,6 +37,11 @@ public class CardUI : MonoBehaviour
     public Image frameImage;
     public Image glowRingImage;
 
+    [Tooltip("Optional: rarity background image layer behind the frame. " +
+             "Driven by GameIconSystem (Icons/CardBg/card_{rarity}_bg). " +
+             "Placeholder PNGs in place — swap with Scenario.gg art post-launch.")]
+    public Image rarityBackgroundImage;
+
     [Header("Content")]
     public Image      portraitImage;
     public Image      categoryBadgeImage; // skill only
@@ -143,6 +148,17 @@ public class CardUI : MonoBehaviour
             }
         }
         if (glowRingImage != null) glowRingImage.color = glowColor;
+
+        // Rarity background texture (Icons/CardBg/card_{rarity}_bg)
+        // Placeholder PNGs in place; swap with final Scenario.gg art post-launch.
+        // When rarityBackgroundImage is not assigned in Inspector, this is a no-op.
+        if (rarityBackgroundImage != null)
+        {
+            string bgKey = GameIconSystem.CardRarityBgKey(rarity);
+            GameIconSystem.ApplyIcon(rarityBackgroundImage, bgKey);
+            // Reset color to white so the texture shows through without tinting
+            rarityBackgroundImage.color = Color.white;
+        }
     }
 
     void ApplyPortrait(string portraitKey)

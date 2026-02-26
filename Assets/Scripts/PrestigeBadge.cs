@@ -44,6 +44,10 @@ public class PrestigeBadge : MonoBehaviour
     [Tooltip("Root GameObject to hide entirely when prestige == 0")]
     public GameObject prestigeContainer;
 
+    [Tooltip("Badge icon image — auto-set from GameIconSystem (Icons/Prestige/prestige_{n}).")]
+    [Tooltip("Placeholder PNGs in place; swap with Scenario.gg art post-launch.")]
+    public Image    prestigeBadgeIcon;
+
     [Header("Prestige Glow")]
     [Tooltip("Image to apply purple glow tint (character portrait or icon)")]
     public Image    glowTarget;
@@ -144,6 +148,11 @@ public class PrestigeBadge : MonoBehaviour
             else if (!showGlowWithoutPrestige)
                 glowTarget.color = Color.white;
         }
+
+        // Prestige badge icon (Icons/Prestige/prestige_{n})
+        // Placeholder PNGs loaded from Resources; swap art post-launch via GameIconSystem.
+        if (prestigeBadgeIcon != null)
+            GameIconSystem.ApplyPrestigeBadge(prestigeBadgeIcon, _prestige);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────

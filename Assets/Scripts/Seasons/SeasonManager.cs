@@ -658,6 +658,36 @@ public class SeasonManager : MonoBehaviour
         return prestige >= CurrentSeason.cosmetic.prestigeFree;
     }
 
+    // ─── Seasonal Icon Helpers ────────────────────────────────────────────────
+
+    /// <summary>
+    /// Returns the GameIconSystem key for the current season's tier icon.
+    /// Maps to Icons/Seasonal/season_{rookie|silver|legend}.
+    /// Placeholder PNGs are in place; swap with Scenario.gg art post-launch.
+    /// </summary>
+    public string GetCurrentSeasonIconKey()
+    {
+        string tier = RankedProgressionManager.Instance?.State.currentTier.name ?? "Rookie";
+        return GameIconSystem.SeasonIconKey(tier);
+    }
+
+    /// <summary>
+    /// Apply the current season's tier icon to a Unity UI Image.
+    /// Safe no-op if image is null or GameIconSystem not initialized.
+    /// </summary>
+    public void ApplyCurrentSeasonIcon(UnityEngine.UI.Image targetImage)
+    {
+        if (targetImage == null) return;
+        string key = GetCurrentSeasonIconKey();
+        GameIconSystem.ApplyIcon(targetImage, key);
+    }
+
+    /// <summary>
+    /// Returns the GameIconSystem key for a past season tier (for archive screens).
+    /// </summary>
+    public static string GetSeasonIconKeyForTier(string tierName)
+        => GameIconSystem.SeasonIconKey(tierName);
+
     // ─── Firestore parse ──────────────────────────────────────────────────────
 
 #if FIREBASE_FIRESTORE
