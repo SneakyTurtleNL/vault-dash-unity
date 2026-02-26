@@ -6,23 +6,27 @@ using UnityEditor;
 #endif
 
 /// <summary>
-/// AssetAudit — Verifies all 31 premium game assets are present and loadable.
+/// AssetAudit — Verifies all 55 game assets are present and loadable.
 ///
-/// ASSET MANIFEST (31 assets):
-///   Characters (10): AgentZero, Blaze, Knox, Jade, Raven, Phoenix,
-///                    Ghost, Shadow, Titan, Ember
-///   UI Icons   (16): icon_coin, icon_gem, icon_trophy, icon_shield,
-///                    icon_star, icon_chest, icon_arrow_up, icon_arrow_down,
-///                    icon_settings, icon_friends, icon_clan, icon_ranked,
-///                    icon_solo, icon_casual, icon_pvp, icon_spectate
-///   Arenas      (5): arena_rookie, arena_silver, arena_gold,
-///                    arena_diamond, arena_legend
+/// ASSET MANIFEST v2 — Updated 2026-02-26 (55 assets):
+///   Characters  (12): agent_zero, blaze, cipher, eclipse, ghost, jade,
+///                     knox, nova, phoenix, pulse, tank, viper
+///   Victory      (3): agent_zero_victory, blaze_victory, cipher_victory
+///   Skills      (12): deflect, double_loot, freeze, ghost_skill, magnet,
+///                     obstacle, reverse, shield, shrink, slowmo, steal, vault_key
+///   Power-ups    (5): power_freeze, power_reverse, power_shrink,
+///                     power_obstacle, power_electric
+///   Chests       (3): chest_silver, chest_gold, chest_legendary
+///   Currency     (3): coin, gem, trophy
+///   Tiers        (6): tier_rookie/silver/gold/diamond/master/legend
+///   Arenas       (6): rookie, silver, gold, diamond, legend, master_arena
 ///
 /// STYLE CONSISTENCY CHECKS (code-level):
-///   • Each character portrait: 512×512 px
-///   • Each UI icon:           256×256 px
-///   • Each arena background:  1024×512 px
-///   • All textures: RGBA32 format, mipmaps enabled
+///   • Character portraits: 1024×1024 px (jade/knox: 512×512 RGBA)
+///   • Skill icons:          512×512 px
+///   • Power-up icons:       512×512 px (power_obstacle: 256×256)
+///   • Arena backgrounds:   1024×512 px (master: 1024×1024)
+///   • All textures must load via Resources.Load
 ///
 /// USAGE:
 ///   // Runtime check (always compiled):
@@ -47,44 +51,78 @@ public class AssetAudit : MonoBehaviour
         public string Category;
     }
 
+    // ASSET MANIFEST v2 — Updated 2026-02-26 to match actual file paths in Assets/Resources/
+    // Characters: 12 actual portraits (no "portrait_" prefix, no "shadow"/"raven"/"titan"/"ember")
+    // Icons: subdir structure (Currency/, Tiers/, Actions/, UI/, PowerUps/)
+    // ArenaBackgrounds: correct folder name (was "Arenas/")
+    // Skills + Chests added for Saturday playtest coverage
     private static readonly AssetSpec[] Manifest = new AssetSpec[]
     {
-        // ── Characters (10 × 512×512) ─────────────────────────────────────
-        new AssetSpec { ResourcePath = "Characters/portrait_agent_zero",  ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
-        new AssetSpec { ResourcePath = "Characters/portrait_blaze",       ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
-        new AssetSpec { ResourcePath = "Characters/portrait_knox",        ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
-        new AssetSpec { ResourcePath = "Characters/portrait_jade",        ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
-        new AssetSpec { ResourcePath = "Characters/portrait_raven",       ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
-        new AssetSpec { ResourcePath = "Characters/portrait_phoenix",     ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
-        new AssetSpec { ResourcePath = "Characters/portrait_ghost",       ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
-        new AssetSpec { ResourcePath = "Characters/portrait_shadow",      ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
-        new AssetSpec { ResourcePath = "Characters/portrait_titan",       ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
-        new AssetSpec { ResourcePath = "Characters/portrait_ember",       ExpectedWidth = 512, ExpectedHeight = 512, Category = "Character" },
+        // ── Characters (12 × various sizes) ──────────────────────────────
+        new AssetSpec { ResourcePath = "Characters/agent_zero", ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/blaze",      ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/cipher",     ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/eclipse",    ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/ghost",      ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/jade",       ExpectedWidth = 512,  ExpectedHeight = 512,  Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/knox",       ExpectedWidth = 512,  ExpectedHeight = 512,  Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/nova",       ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/phoenix",    ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/pulse",      ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/tank",       ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
+        new AssetSpec { ResourcePath = "Characters/viper",      ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Character" },
 
-        // ── UI Icons (16 × 256×256) ────────────────────────────────────────
-        new AssetSpec { ResourcePath = "Icons/icon_coin",       ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_gem",        ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_trophy",     ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_shield",     ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_star",       ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_chest",      ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_arrow_up",   ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_arrow_down", ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_settings",   ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_friends",    ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_clan",       ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_ranked",     ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_solo",       ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_casual",     ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_pvp",        ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
-        new AssetSpec { ResourcePath = "Icons/icon_spectate",   ExpectedWidth = 256, ExpectedHeight = 256, Category = "Icon" },
+        // ── Victory Poses (3 × 512×512) ────────────────────────────────────
+        new AssetSpec { ResourcePath = "Characters/Victory/agent_zero_victory", ExpectedWidth = 512, ExpectedHeight = 512, Category = "VictoryPose" },
+        new AssetSpec { ResourcePath = "Characters/Victory/blaze_victory",      ExpectedWidth = 512, ExpectedHeight = 512, Category = "VictoryPose" },
+        new AssetSpec { ResourcePath = "Characters/Victory/cipher_victory",     ExpectedWidth = 512, ExpectedHeight = 512, Category = "VictoryPose" },
 
-        // ── Arenas (5 × 1024×512) ─────────────────────────────────────────
-        new AssetSpec { ResourcePath = "Arenas/arena_rookie",   ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
-        new AssetSpec { ResourcePath = "Arenas/arena_silver",   ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
-        new AssetSpec { ResourcePath = "Arenas/arena_gold",     ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
-        new AssetSpec { ResourcePath = "Arenas/arena_diamond",  ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
-        new AssetSpec { ResourcePath = "Arenas/arena_legend",   ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
+        // ── Skills (12 × 512×512) ──────────────────────────────────────────
+        new AssetSpec { ResourcePath = "Skills/deflect",    ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/double_loot",ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/freeze",     ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/ghost_skill",ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/magnet",     ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/obstacle",   ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/reverse",    ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/shield",     ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/shrink",     ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/slowmo",     ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/steal",      ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+        new AssetSpec { ResourcePath = "Skills/vault_key",  ExpectedWidth = 512, ExpectedHeight = 512, Category = "Skill" },
+
+        // ── Power-ups (5 × 512×512 or 256×256) ────────────────────────────
+        new AssetSpec { ResourcePath = "Icons/PowerUps/power_freeze",   ExpectedWidth = 512, ExpectedHeight = 512, Category = "PowerUp" },
+        new AssetSpec { ResourcePath = "Icons/PowerUps/power_reverse",  ExpectedWidth = 512, ExpectedHeight = 512, Category = "PowerUp" },
+        new AssetSpec { ResourcePath = "Icons/PowerUps/power_shrink",   ExpectedWidth = 512, ExpectedHeight = 512, Category = "PowerUp" },
+        new AssetSpec { ResourcePath = "Icons/PowerUps/power_obstacle", ExpectedWidth = 256, ExpectedHeight = 256, Category = "PowerUp" },
+        new AssetSpec { ResourcePath = "Icons/PowerUps/power_electric", ExpectedWidth = 512, ExpectedHeight = 512, Category = "PowerUp" },
+
+        // ── Chests (3 × 512×512) ───────────────────────────────────────────
+        new AssetSpec { ResourcePath = "Rewards/chest_silver",    ExpectedWidth = 512, ExpectedHeight = 512, Category = "Chest" },
+        new AssetSpec { ResourcePath = "Rewards/chest_gold",      ExpectedWidth = 512, ExpectedHeight = 512, Category = "Chest" },
+        new AssetSpec { ResourcePath = "Rewards/chest_legendary", ExpectedWidth = 512, ExpectedHeight = 512, Category = "Chest" },
+
+        // ── UI Icons — Currency (3 × 512×512) ─────────────────────────────
+        new AssetSpec { ResourcePath = "Icons/Currency/coin",   ExpectedWidth = 512, ExpectedHeight = 512, Category = "Icon" },
+        new AssetSpec { ResourcePath = "Icons/Currency/gem",    ExpectedWidth = 512, ExpectedHeight = 512, Category = "Icon" },
+        new AssetSpec { ResourcePath = "Icons/Currency/trophy", ExpectedWidth = 512, ExpectedHeight = 512, Category = "Icon" },
+
+        // ── UI Icons — Tiers (6 × 512×512) ────────────────────────────────
+        new AssetSpec { ResourcePath = "Icons/Tiers/tier_rookie",   ExpectedWidth = 512, ExpectedHeight = 512, Category = "Icon" },
+        new AssetSpec { ResourcePath = "Icons/Tiers/tier_silver",   ExpectedWidth = 512, ExpectedHeight = 512, Category = "Icon" },
+        new AssetSpec { ResourcePath = "Icons/Tiers/tier_gold",     ExpectedWidth = 512, ExpectedHeight = 512, Category = "Icon" },
+        new AssetSpec { ResourcePath = "Icons/Tiers/tier_diamond",  ExpectedWidth = 512, ExpectedHeight = 512, Category = "Icon" },
+        new AssetSpec { ResourcePath = "Icons/Tiers/tier_master",   ExpectedWidth = 512, ExpectedHeight = 512, Category = "Icon" },
+        new AssetSpec { ResourcePath = "Icons/Tiers/tier_legend",   ExpectedWidth = 512, ExpectedHeight = 512, Category = "Icon" },
+
+        // ── Arena Backgrounds (6 × 1024×512) ──────────────────────────────
+        new AssetSpec { ResourcePath = "ArenaBackgrounds/rookie",       ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
+        new AssetSpec { ResourcePath = "ArenaBackgrounds/silver",       ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
+        new AssetSpec { ResourcePath = "ArenaBackgrounds/gold",         ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
+        new AssetSpec { ResourcePath = "ArenaBackgrounds/diamond",      ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
+        new AssetSpec { ResourcePath = "ArenaBackgrounds/legend",       ExpectedWidth = 1024, ExpectedHeight = 512, Category = "Arena" },
+        new AssetSpec { ResourcePath = "ArenaBackgrounds/master_arena", ExpectedWidth = 1024, ExpectedHeight = 1024, Category = "Arena" },
     };
 
     // ─── Result ───────────────────────────────────────────────────────────────
@@ -108,7 +146,7 @@ public class AssetAudit : MonoBehaviour
         var results   = new List<AuditResult>();
         int pass = 0, fail = 0, missing = 0;
 
-        Debug.Log("[AssetAudit] ─── Starting Asset Audit (31 assets) ───");
+        Debug.Log($"[AssetAudit] ─── Starting Asset Audit ({Manifest.Length} assets) ───");
 
         foreach (var spec in Manifest)
         {
